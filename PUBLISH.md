@@ -115,3 +115,14 @@ The updater reads `/repos/{owner}/{KEYRA}/releases/latest`, compares SemVer with
 ## Do not commit
 
 Never add vault files from `%LocalAppData%\SshKeyManager\` or private keys to the repo. See [SECURITY.md](SECURITY.md).
+
+Local design drafts (`New_Update_KEYRA.md`, Cursor canvases, signing `.pfx`) are listed in [`.gitignore`](.gitignore).
+
+If GitHub Desktop still shows an ignored file that was committed earlier, right‑click → **Discard** will not remove it from history tracking — use **Repository → Open in command prompt** (GitHub Desktop’s Git) and:
+
+```powershell
+git rm -r --cached New_Update_KEYRA.md 2>$null
+git rm -r --cached --ignore-unmatch canvases .cursor
+git add .gitignore
+git commit -m "chore: stop tracking local work files"
+```

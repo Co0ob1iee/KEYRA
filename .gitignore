@@ -14,12 +14,12 @@ artifacts/
 *.log
 project.lock.json
 project.fragment.lock.json
-artifacts/
 
-## Visual Studio / Rider / VS Code
+## Visual Studio / Rider / VS Code / Cursor
 .vs/
 .vscode/
 .idea/
+.cursor/
 *.user
 *.userosscache
 *.suo
@@ -29,7 +29,6 @@ artifacts/
 *.DotSettings.user
 *.swp
 *~
-*.tmp
 
 ## NuGet
 *.nupkg
@@ -39,12 +38,17 @@ artifacts/
 *.nuget.props
 *.nuget.targets
 
-## User secrets & local config
+## User secrets, local config, signing material (NEVER commit)
 **/secrets.json
 **/appsettings.*.local.json
 **/appsettings.Development.json
 *.pfx
 *.p12
+*.cer
+*.spc
+*.p7b
+SigningCertificate*
+*_Encoded.txt
 *.key
 *.pem
 !**/Assets/**
@@ -61,17 +65,21 @@ keyra.db
 **/index.json
 **/*.key.enc
 **/startup-error.log
+**/settings.json
 **/LocalAppData/
 AppData/
+hardware-tmp/
+KEYRA-update/
 
-# Typical LocalApplicationData mirror if someone copies vault into the repo
-SshKeyManager/
-!src/SshKeyManager/
+# Accidental vault folder copies at repo root (keep src/SshKeyManager/)
+/SshKeyManager/
 
 ## OS junk
 Thumbs.db
 Desktop.ini
 .DS_Store
+ehthumbs.db
+[Dd]esktop.ini
 
 ## Publish / release drop folders
 /dist/
@@ -86,3 +94,18 @@ TestResults/
 coverage/
 *.coverage
 *.coveragexml
+BenchmarkDotNet.Artifacts/
+
+## Local work / drafts (not for public GitHub)
+New_Update_KEYRA.md
+Dokumentacja*.md
+*_Update_KEYRA.md
+*_Update_*.md
+*.canvas.tsx
+canvases/
+agent-transcripts/
+*.local.md
+scratch/
+tmp/
+temp/
+.wip/
