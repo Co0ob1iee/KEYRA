@@ -1,0 +1,39 @@
+<UserControl x:Class="SshKeyManager.Views.Controls.LoadingOverlay"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="Root"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True"
+             IsHitTestVisible="True">
+    <UserControl.Visibility>
+        <Binding Path="IsBusy"
+                 ElementName="Root"
+                 Converter="{StaticResource BooleanToVisibilityConverter}" />
+    </UserControl.Visibility>
+
+    <Grid Background="{StaticResource OverlayScrimBrush}">
+        <StackPanel VerticalAlignment="Center"
+                    HorizontalAlignment="Center"
+                    MinWidth="220">
+            <ProgressBar IsIndeterminate="True"
+                         Height="{StaticResource Space8}"
+                         Width="220"
+                         Foreground="{StaticResource AccentBrush}"
+                         Background="{StaticResource SkeletonBrush}"
+                         BorderThickness="0" />
+
+            <Border Style="{StaticResource LoadingSkeletonStyle}"
+                    Height="{StaticResource Space8}"
+                    Width="180"
+                    Margin="0,16,0,0"
+                    HorizontalAlignment="Center" />
+
+            <TextBlock Text="{Binding Message, ElementName=Root}"
+                       Style="{StaticResource MutedTextStyle}"
+                       HorizontalAlignment="Center"
+                       TextAlignment="Center"
+                       Margin="0,16,0,0"
+                       Visibility="{Binding Message, ElementName=Root, Converter={StaticResource NullToVisibilityConverter}}" />
+        </StackPanel>
+    </Grid>
+</UserControl>

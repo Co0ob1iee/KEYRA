@@ -1,0 +1,92 @@
+<UserControl x:Class="SshKeyManager.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:SshKeyManager.Views.Controls"
+             xmlns:helpers="clr-namespace:SshKeyManager.Helpers">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel MaxWidth="760" HorizontalAlignment="Left">
+            <controls:SectionHeader Title="{Binding Title}" />
+
+            <Border Style="{StaticResource FormCardStyle}">
+                <StackPanel>
+                    <TextBlock Text="{Binding InfoText}"
+                               Style="{StaticResource BodyTextStyle}"
+                               Margin="{StaticResource MarginFormCard}" />
+
+                    <TextBlock Text="{Binding LanguageLabel}" Style="{StaticResource LabelTextStyle}" />
+                    <ComboBox ItemsSource="{Binding LanguageOptions}"
+                              SelectedItem="{Binding SelectedLanguage}"
+                              DisplayMemberPath="NativeName"
+                              Margin="{StaticResource MarginFormCard}" />
+
+                    <TextBlock Text="{Binding RootPathLabel}" Style="{StaticResource LabelTextStyle}" />
+                    <TextBox Text="{Binding RootPath, Mode=OneWay}"
+                             IsReadOnly="True"
+                             Margin="{StaticResource MarginSubsectionBottom}" />
+                    <Button Content="{Binding OpenRootLabel}"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            HorizontalAlignment="Left"
+                            Margin="{StaticResource MarginFormCard}"
+                            Command="{Binding OpenRootFolderCommand}" />
+
+                    <TextBlock Text="{Binding VaultPathLabel}" Style="{StaticResource LabelTextStyle}" />
+                    <TextBox Text="{Binding VaultPath, Mode=OneWay}"
+                             IsReadOnly="True"
+                             Margin="{StaticResource MarginSubsectionBottom}" />
+                    <Button Content="{Binding OpenVaultLabel}"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            HorizontalAlignment="Left"
+                            Margin="{StaticResource MarginFormCard}"
+                            Command="{Binding OpenVaultFolderCommand}" />
+
+                    <TextBlock Text="{Binding SshPathLabel}" Style="{StaticResource LabelTextStyle}" />
+                    <TextBox Text="{Binding SshPath, Mode=OneWay}" IsReadOnly="True" />
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="{Binding ChangePasswordTitle}"
+                       Style="{StaticResource SubsectionTitleStyle}"
+                       Margin="{StaticResource MarginSubsectionBottom}" />
+            <Border Style="{StaticResource FormCardStyle}">
+                <StackPanel>
+                    <TextBlock Text="{Binding ChangePasswordHint}"
+                               Style="{StaticResource MutedTextStyle}"
+                               Margin="{StaticResource MarginFieldBottom}" />
+
+                    <TextBlock Text="{Binding CurrentPasswordLabel}" Style="{StaticResource LabelTextStyle}" />
+                    <PasswordBox helpers:PasswordBoxHelper.BindPassword="True"
+                                 helpers:PasswordBoxHelper.BoundPassword="{Binding CurrentPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="{StaticResource MarginSubsectionBottom}" />
+
+                    <TextBlock Text="{Binding NewPasswordLabel}" Style="{StaticResource LabelTextStyle}" />
+                    <PasswordBox helpers:PasswordBoxHelper.BindPassword="True"
+                                 helpers:PasswordBoxHelper.BoundPassword="{Binding NewPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="{StaticResource MarginSubsectionBottom}" />
+
+                    <TextBlock Text="{Binding ConfirmPasswordLabel}" Style="{StaticResource LabelTextStyle}" />
+                    <PasswordBox helpers:PasswordBoxHelper.BindPassword="True"
+                                 helpers:PasswordBoxHelper.BoundPassword="{Binding ConfirmNewPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="{StaticResource MarginSubsectionBottom}" />
+
+                    <TextBlock Text="{Binding PasswordChangeMessage}"
+                               Foreground="{StaticResource AccentBrush}"
+                               TextWrapping="Wrap"
+                               Margin="{StaticResource MarginSubsectionBottom}"
+                               Visibility="{Binding PasswordChangeMessage, Converter={StaticResource NullToVisibilityConverter}}" />
+
+                    <Button Content="{Binding ChangeButtonLabel}"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            HorizontalAlignment="Left"
+                            Command="{Binding ChangePasswordCommand}" />
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="{Binding SecurityTitle}"
+                       Style="{StaticResource SubsectionTitleStyle}"
+                       Margin="0,8,0,6" />
+            <TextBlock Text="{Binding SecurityHint}"
+                       Style="{StaticResource MutedTextStyle}"
+                       TextWrapping="Wrap" />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

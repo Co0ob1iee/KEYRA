@@ -1,0 +1,81 @@
+## .NET / build
+bin/
+obj/
+out/
+publish/
+artifacts/
+[Bb]uild/
+[Ll]og/
+[Ll]ogs/
+*.dll
+*.exe
+*.pdb
+*.cache
+*.log
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## Visual Studio / Rider / VS Code
+.vs/
+.vscode/
+.idea/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.sln.docstates
+*.rsuser
+*.DotSettings.user
+*.swp
+*~
+*.tmp
+
+## NuGet
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+
+## User secrets & local config
+**/secrets.json
+**/appsettings.*.local.json
+**/appsettings.Development.json
+*.pfx
+*.p12
+*.key
+*.pem
+!**/Assets/**
+
+## KEYRA vault / runtime data (NEVER commit)
+**/master.key.enc
+**/KeyGarageHash
+**/connections.json
+**/index.json
+**/*.key.enc
+**/startup-error.log
+**/LocalAppData/
+AppData/
+
+# Typical LocalApplicationData mirror if someone copies vault into the repo
+SshKeyManager/
+!src/SshKeyManager/
+
+## OS junk
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+## Publish / release drop folders
+/dist/
+/release/
+*.zip
+!docs/**/*.zip
+
+## Test / coverage
+TestResults/
+coverage/
+*.coverage
+*.coveragexml

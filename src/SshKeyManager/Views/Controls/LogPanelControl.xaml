@@ -1,0 +1,45 @@
+<UserControl x:Class="SshKeyManager.Views.Controls.LogPanelControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="clr-namespace:SshKeyManager.Views.Controls"
+             UseLayoutRounding="True"
+             SnapsToDevicePixels="True">
+    <Border Background="{StaticResource SurfaceBrush}"
+            BorderBrush="{StaticResource BorderSubtleBrush}"
+            BorderThickness="0,1,0,0">
+        <DockPanel>
+            <Border DockPanel.Dock="Top"
+                    Height="28"
+                    Background="{StaticResource SurfaceBrush}"
+                    BorderBrush="{StaticResource BorderSubtleBrush}"
+                    BorderThickness="0,0,0,1"
+                    Padding="12,0">
+                <DockPanel LastChildFill="False">
+                    <TextBlock Text="{Binding Title}"
+                               Style="{StaticResource SubsectionTitleStyle}"
+                               Margin="0"
+                               VerticalAlignment="Center"
+                               DockPanel.Dock="Left" />
+
+                    <StackPanel Orientation="Horizontal"
+                                VerticalAlignment="Center"
+                                DockPanel.Dock="Right">
+                        <Button Content="{Binding ToggleLabel}"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Padding="10,2"
+                                Margin="0,0,8,0"
+                                Command="{Binding ToggleExpandedCommand}" />
+                        <Button Content="{Binding ClearLabel}"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Padding="10,2"
+                                Command="{Binding ClearLogCommand}" />
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <controls:LogViewer Visibility="{Binding IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                MinHeight="80"
+                                DataContext="{Binding}" />
+        </DockPanel>
+    </Border>
+</UserControl>

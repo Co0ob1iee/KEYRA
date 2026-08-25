@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="App_Title" xml:space="preserve"><value>KEYRA</value></data>
+  <data name="App_StartupFailed" xml:space="preserve"><value>Failed to start KEYRA.\n{0}</value></data>
+  <data name="Nav_Keys" xml:space="preserve"><value>Keys</value></data>
+  <data name="Nav_Generate" xml:space="preserve"><value>Generate</value></data>
+  <data name="Nav_Import" xml:space="preserve"><value>Import</value></data>
+  <data name="Nav_Connections" xml:space="preserve"><value>Connections</value></data>
+  <data name="Nav_Settings" xml:space="preserve"><value>Settings</value></data>
+  <data name="Nav_LockVault" xml:space="preserve"><value>Lock vault</value></data>
+  <data name="Status_Ready" xml:space="preserve"><value>Ready</value></data>
+  <data name="Status_StartupError" xml:space="preserve"><value>Startup error.</value></data>
+  <data name="Status_KeysLoaded" xml:space="preserve"><value>Loaded {0} key(s).</value></data>
+  <data name="Status_FailedLoadVault" xml:space="preserve"><value>Failed to load vault.</value></data>
+  <data name="Status_PublicKeyCopied" xml:space="preserve"><value>Public key copied.</value></data>
+  <data name="Status_CopyFailed" xml:space="preserve"><value>Copy failed.</value></data>
+  <data name="Status_PrivateKeyCopied" xml:space="preserve"><value>Private key copied — clear clipboard soon.</value></data>
+  <data name="Status_CopyPrivateKeyFailed" xml:space="preserve"><value>Copy private key failed.</value></data>
+  <data name="Status_PrivateKeyVisible" xml:space="preserve"><value>Private key visible — auto-hide in 15s.</value></data>
+  <data name="Status_RevealFailed" xml:space="preserve"><value>Reveal failed.</value></data>
+  <data name="Status_KeyExported" xml:space="preserve"><value>Key exported.</value></data>
+  <data name="Status_ExportFailed" xml:space="preserve"><value>Export failed.</value></data>
+  <data name="Status_ExportedToSsh" xml:space="preserve"><value>Exported to ~/.ssh.</value></data>
+  <data name="Status_ExportToSshFailed" xml:space="preserve"><value>Export to ~/.ssh failed.</value></data>
+  <data name="Status_KeyDeleted" xml:space="preserve"><value>Key deleted.</value></data>
+  <data name="Status_DeleteFailed" xml:space="preserve"><value>Delete failed.</value></data>
+  <data name="Status_PrivateKeyHidden" xml:space="preserve"><value>Private key hidden.</value></data>
+  <data name="Status_Generating" xml:space="preserve"><value>Generating key…</value></data>
+  <data name="Status_KeyGenerated" xml:space="preserve"><value>Key generated.</value></data>
+  <data name="Status_GenerateFailed" xml:space="preserve"><value>Generate failed.</value></data>
+  <data name="Status_Importing" xml:space="preserve"><value>Importing key…</value></data>
+  <data name="Status_KeyImported" xml:space="preserve"><value>Key imported.</value></data>
+  <data name="Status_ImportFailed" xml:space="preserve"><value>Import failed.</value></data>
+  <data name="Status_SshConnected" xml:space="preserve"><value>Connected via SSH.</value></data>
+  <data name="Status_SshConnectFailed" xml:space="preserve"><value>SSH connection failed.</value></data>
+  <data name="Status_Disconnected" xml:space="preserve"><value>Disconnected.</value></data>
+  <data name="Status_VaultLocked" xml:space="preserve"><value>Vault locked.</value></data>
+  <data name="Status_OpenVaultFolder" xml:space="preserve"><value>Vault folder opened.</value></data>
+  <data name="Status_OpenVaultFailed" xml:space="preserve"><value>Cannot open vault folder.</value></data>
+  <data name="Status_OpenRootFolder" xml:space="preserve"><value>App folder opened.</value></data>
+  <data name="Status_OpenRootFailed" xml:space="preserve"><value>Cannot open app folder.</value></data>
+  <data name="Status_LogCleared" xml:space="preserve"><value>Log cleared.</value></data>
+  <data name="Status_PasswordChanged" xml:space="preserve"><value>Password changed.</value></data>
+  <data name="Inspector_Title" xml:space="preserve"><value>Inspector</value></data>
+  <data name="Inspector_TabDetails" xml:space="preserve"><value>Details</value></data>
+  <data name="Inspector_TabActions" xml:space="preserve"><value>Actions</value></data>
+  <data name="Inspector_SelectKey" xml:space="preserve"><value>Select a key to inspect.</value></data>
+  <data name="Inspector_Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Inspector_Algorithm" xml:space="preserve"><value>Algorithm</value></data>
+  <data name="Inspector_Fingerprint" xml:space="preserve"><value>Fingerprint</value></data>
+  <data name="Inspector_Comment" xml:space="preserve"><value>Comment</value></data>
+  <data name="Inspector_PublicKey" xml:space="preserve"><value>Public key</value></data>
+  <data name="Inspector_VaultPath" xml:space="preserve"><value>Vault path</value></data>
+  <data name="Inspector_CopyPublicKey" xml:space="preserve"><value>Copy public key</value></data>
+  <data name="Inspector_ShowPrivateKey" xml:space="preserve"><value>Show private key</value></data>
+  <data name="Inspector_CopyPrivateKey" xml:space="preserve"><value>Copy private key</value></data>
+  <data name="Inspector_ExportFolder" xml:space="preserve"><value>Export to folder…</value></data>
+  <data name="Inspector_ExportSsh" xml:space="preserve"><value>Export to ~/.ssh</value></data>
+  <data name="Inspector_Delete" xml:space="preserve"><value>Delete</value></data>
+  <data name="Inspector_PrivateKey" xml:space="preserve"><value>Private key</value></data>
+  <data name="Inspector_HideNow" xml:space="preserve"><value>Hide now</value></data>
+  <data name="Log_Title" xml:space="preserve"><value>Operations</value></data>
+  <data name="Log_Clear" xml:space="preserve"><value>Clear</value></data>
+  <data name="Log_Expand" xml:space="preserve"><value>Expand</value></data>
+  <data name="Log_Collapse" xml:space="preserve"><value>Collapse</value></data>
+  <data name="Log_Filter" xml:space="preserve"><value>Level</value></data>
+  <data name="Log_FilterAll" xml:space="preserve"><value>All</value></data>
+  <data name="Log_Search" xml:space="preserve"><value>Search log…</value></data>
+  <data name="StatusBar_Ready" xml:space="preserve"><value>READY</value></data>
+  <data name="StatusBar_Keys" xml:space="preserve"><value>Keys</value></data>
+  <data name="StatusBar_KeyCount" xml:space="preserve"><value>Keys: {0}</value></data>
+  <data name="StatusBar_Ssh" xml:space="preserve"><value>SSH</value></data>
+  <data name="StatusBar_VaultUnlocked" xml:space="preserve"><value>Vault unlocked</value></data>
+  <data name="Empty_NoKeysTitle" xml:space="preserve"><value>No keys in KEYRA yet</value></data>
+  <data name="Empty_NoKeysMessage" xml:space="preserve"><value>Generate or import an SSH key to get started with KEYRA.</value></data>
+  <data name="Loading_PleaseWait" xml:space="preserve"><value>Please wait…</value></data>
+  <data name="Keys_Title" xml:space="preserve"><value>Keys</value></data>
+  <data name="Keys_Refresh" xml:space="preserve"><value>Refresh</value></data>
+  <data name="Keys_SearchWatermark" xml:space="preserve"><value>Search by name, fingerprint or comment…</value></data>
+  <data name="Keys_Empty" xml:space="preserve"><value>KEYRA vault is empty. Generate or import a key.</value></data>
+  <data name="Keys_CopyPub" xml:space="preserve"><value>Copy .pub</value></data>
+  <data name="Keys_Export" xml:space="preserve"><value>Export</value></data>
+  <data name="Keys_Delete" xml:space="preserve"><value>Delete</value></data>
+  <data name="Keys_PassphraseYes" xml:space="preserve"><value>Passphrase: yes</value></data>
+  <data name="Keys_PassphraseNo" xml:space="preserve"><value>Passphrase: no</value></data>
+  <data name="Generate_Title" xml:space="preserve"><value>Generate key</value></data>
+  <data name="Generate_Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Generate_Comment" xml:space="preserve"><value>Comment</value></data>
+  <data name="Generate_Algorithm" xml:space="preserve"><value>Algorithm</value></data>
+  <data name="Generate_Algorithm_Ed25519" xml:space="preserve"><value>Ed25519 (recommended)</value></data>
+  <data name="Generate_Algorithm_Rsa4096" xml:space="preserve"><value>RSA 4096</value></data>
+  <data name="Generate_Passphrase" xml:space="preserve"><value>Passphrase (optional)</value></data>
+  <data name="Generate_ConfirmPassphrase" xml:space="preserve"><value>Confirm passphrase</value></data>
+  <data name="Generate_Button" xml:space="preserve"><value>Generate</value></data>
+  <data name="Generate_Busy" xml:space="preserve"><value>Generating…</value></data>
+  <data name="Generate_Fingerprint" xml:space="preserve"><value>Fingerprint</value></data>
+  <data name="Generate_PublicKey" xml:space="preserve"><value>Public key</value></data>
+  <data name="Generate_NameRequired" xml:space="preserve"><value>Name is required.</value></data>
+  <data name="Generate_PassphraseMismatch" xml:space="preserve"><value>Passphrases do not match.</value></data>
+  <data name="Generate_Success" xml:space="preserve"><value>Key generated and saved to vault.</value></data>
+  <data name="Import_Title" xml:space="preserve"><value>Import key</value></data>
+  <data name="Import_Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Import_PrivateKey" xml:space="preserve"><value>Private key (OpenSSH PEM)</value></data>
+  <data name="Import_Browse" xml:space="preserve"><value>Browse…</value></data>
+  <data name="Import_Passphrase" xml:space="preserve"><value>Passphrase (if encrypted)</value></data>
+  <data name="Import_Preview" xml:space="preserve"><value>Preview</value></data>
+  <data name="Import_Button" xml:space="preserve"><value>Import to vault</value></data>
+  <data name="Import_Fingerprint" xml:space="preserve"><value>Fingerprint</value></data>
+  <data name="Import_PublicKey" xml:space="preserve"><value>Public key</value></data>
+  <data name="Import_NameRequired" xml:space="preserve"><value>Name is required.</value></data>
+  <data name="Import_KeyRequired" xml:space="preserve"><value>Private key is required.</value></data>
+  <data name="Import_PasteFirst" xml:space="preserve"><value>Paste or load a private key first.</value></data>
+  <data name="Import_Success" xml:space="preserve"><value>Imported and saved to vault.</value></data>
+  <data name="Import_DialogTitle" xml:space="preserve"><value>Import OpenSSH private key</value></data>
+  <data name="Import_LoadedFile" xml:space="preserve"><value>Loaded file: {0}</value></data>
+  <data name="Import_Parsed" xml:space="preserve"><value>Parsed {0} — {1}</value></data>
+  <data name="Connections_Title" xml:space="preserve"><value>SSH connections</value></data>
+  <data name="Connections_Host" xml:space="preserve"><value>Host</value></data>
+  <data name="Connections_Port" xml:space="preserve"><value>Port</value></data>
+  <data name="Connections_Username" xml:space="preserve"><value>SSH user</value></data>
+  <data name="Connections_PasswordAuth" xml:space="preserve"><value>Password authentication (instead of vault key)</value></data>
+  <data name="Connections_SshPassword" xml:space="preserve"><value>SSH password</value></data>
+  <data name="Connections_VaultKey" xml:space="preserve"><value>Vault key</value></data>
+  <data name="Connections_KeyPassphrase" xml:space="preserve"><value>OpenSSH key passphrase (optional)</value></data>
+  <data name="Connections_Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Connections_Connect" xml:space="preserve"><value>Connect</value></data>
+  <data name="Connections_Disconnect" xml:space="preserve"><value>Disconnect</value></data>
+  <data name="Connections_Session" xml:space="preserve"><value>Session (terminal)</value></data>
+  <data name="Connections_Clear" xml:space="preserve"><value>Clear</value></data>
+  <data name="Connections_Send" xml:space="preserve"><value>Send</value></data>
+  <data name="Connections_Disconnected" xml:space="preserve"><value>Disconnected</value></data>
+  <data name="Connections_Connecting" xml:space="preserve"><value>Connecting…</value></data>
+  <data name="Connections_Connected" xml:space="preserve"><value>Connected</value></data>
+  <data name="Connections_Disconnecting" xml:space="preserve"><value>Disconnecting…</value></data>
+  <data name="Connections_ErrHostUser" xml:space="preserve"><value>Enter host and username.</value></data>
+  <data name="Connections_ErrSelectKey" xml:space="preserve"><value>Select a vault key or enable password authentication.</value></data>
+  <data name="Connections_Profiles" xml:space="preserve"><value>Saved profiles</value></data>
+  <data name="Connections_ProfileName" xml:space="preserve"><value>Profile name</value></data>
+  <data name="Connections_NewProfile" xml:space="preserve"><value>New</value></data>
+  <data name="Connections_SaveProfile" xml:space="preserve"><value>Save</value></data>
+  <data name="Connections_SaveAsProfile" xml:space="preserve"><value>Save as profile</value></data>
+  <data name="Connections_DeleteProfile" xml:space="preserve"><value>Delete</value></data>
+  <data name="Connections_Favorite" xml:space="preserve"><value>Favorite</value></data>
+  <data name="Connections_EmptyProfilesTitle" xml:space="preserve"><value>No profiles in KEYRA</value></data>
+  <data name="Connections_EmptyProfilesMessage" xml:space="preserve"><value>Fill the form and save your first connection profile.</value></data>
+  <data name="Connections_PasswordNotSavedHint" xml:space="preserve"><value>Password is not stored — enter it each time you connect.</value></data>
+  <data name="Connections_LastUsed" xml:space="preserve"><value>Last used: {0}</value></data>
+  <data name="Connections_NeverConnected" xml:space="preserve"><value>Never used</value></data>
+  <data name="Connections_ErrProfileName" xml:space="preserve"><value>Enter a profile name.</value></data>
+  <data name="Connections_ErrPort" xml:space="preserve"><value>Port must be between 1 and 65535.</value></data>
+  <data name="Connections_ErrPasswordRequired" xml:space="preserve"><value>Enter the SSH password (passwords are not saved in profiles).</value></data>
+  <data name="Connections_ErrSaveProfile" xml:space="preserve"><value>Failed to save profile: {0}</value></data>
+  <data name="Connections_ErrDeleteProfile" xml:space="preserve"><value>Failed to delete profile: {0}</value></data>
+  <data name="Dialog_DeleteProfile" xml:space="preserve"><value>Delete profile “{0}”?\nThis cannot be undone.</value></data>
+  <data name="Log_ProfileSaved" xml:space="preserve"><value>Saved connection profile “{0}”.</value></data>
+  <data name="Log_ProfileDeleted" xml:space="preserve"><value>Deleted connection profile “{0}”.</value></data>
+  <data name="StatusBar_SshConnectedProfile" xml:space="preserve"><value>Connected · {0}</value></data>
+  <data name="StatusBar_SshOneSession" xml:space="preserve"><value>SSH: 1 session</value></data>
+  <data name="StatusBar_SshSessions" xml:space="preserve"><value>SSH: {0} sessions</value></data>
+  <data name="Connections_ActiveSessions" xml:space="preserve"><value>Active sessions</value></data>
+  <data name="Connections_EmptySessionsTitle" xml:space="preserve"><value>No open sessions</value></data>
+  <data name="Connections_EmptySessionsMessage" xml:space="preserve"><value>Use Connect to open a KEYRA terminal in a separate window.</value></data>
+  <data name="Connections_FocusSession" xml:space="preserve"><value>Focus</value></data>
+  <data name="Connections_ActiveSessionCount" xml:space="preserve"><value>Open sessions: {0}</value></data>
+  <data name="Connections_SessionOpened" xml:space="preserve"><value>Opened SSH session: {0}</value></data>
+  <data name="Connections_ErrOpenSession" xml:space="preserve"><value>Failed to open SSH session: {0}</value></data>
+  <data name="Settings_Title" xml:space="preserve"><value>Settings</value></data>
+  <data name="Settings_Info" xml:space="preserve"><value>Private keys are encrypted with AES-256-GCM using a random master key protected by your password (Argon2id). KeyGarageHash verifies vault integrity. Private key material is never written to the operation log.</value></data>
+  <data name="Settings_RootPath" xml:space="preserve"><value>App directory (vault)</value></data>
+  <data name="Settings_OpenRoot" xml:space="preserve"><value>Open app directory</value></data>
+  <data name="Settings_VaultPath" xml:space="preserve"><value>Vault folder (keys)</value></data>
+  <data name="Settings_OpenVault" xml:space="preserve"><value>Open vault folder</value></data>
+  <data name="Settings_SshPath" xml:space="preserve"><value>Default ~/.ssh directory</value></data>
+  <data name="Settings_Language" xml:space="preserve"><value>Language</value></data>
+  <data name="Settings_ChangePassword" xml:space="preserve"><value>Change vault password</value></data>
+  <data name="Settings_ChangePasswordHint" xml:space="preserve"><value>Re-encrypts the master key with a new password and refreshes KeyGarageHash.</value></data>
+  <data name="Settings_CurrentPassword" xml:space="preserve"><value>Current password</value></data>
+  <data name="Settings_NewPassword" xml:space="preserve"><value>New password</value></data>
+  <data name="Settings_ConfirmPassword" xml:space="preserve"><value>Confirm new password</value></data>
+  <data name="Settings_ChangeButton" xml:space="preserve"><value>Change password</value></data>
+  <data name="Settings_Security" xml:space="preserve"><value>Security</value></data>
+  <data name="Settings_SecurityHint" xml:space="preserve"><value>The vault protects keys from other system users, not from malware in your session. Prefer Ed25519. Clear the clipboard after copying a private key.</value></data>
+  <data name="Settings_PasswordMismatch" xml:space="preserve"><value>New passwords do not match.</value></data>
+  <data name="Settings_PasswordChanged" xml:space="preserve"><value>Password changed. Master key re-encrypted.</value></data>
+  <data name="Settings_WrongPassword" xml:space="preserve"><value>Current password is incorrect.</value></data>
+  <data name="Login_WindowTitle" xml:space="preserve"><value>KEYRA — unlock vault</value></data>
+  <data name="Login_Title" xml:space="preserve"><value>Unlock vault</value></data>
+  <data name="Login_Subtitle" xml:space="preserve"><value>Enter your vault account to decrypt the master key.</value></data>
+  <data name="Login_Username" xml:space="preserve"><value>Username</value></data>
+  <data name="Login_Password" xml:space="preserve"><value>Password</value></data>
+  <data name="Login_Exit" xml:space="preserve"><value>Exit</value></data>
+  <data name="Login_Unlock" xml:space="preserve"><value>Unlock</value></data>
+  <data name="Login_InvalidCredentials" xml:space="preserve"><value>Invalid username or password.</value></data>
+  <data name="Setup_WindowTitle" xml:space="preserve"><value>KEYRA — vault setup</value></data>
+  <data name="Setup_Title" xml:space="preserve"><value>First run</value></data>
+  <data name="Setup_Subtitle" xml:space="preserve"><value>Create a local vault account. A random AES-256 key will be encrypted with your password (Argon2id).</value></data>
+  <data name="Setup_Username" xml:space="preserve"><value>Username</value></data>
+  <data name="Setup_Password" xml:space="preserve"><value>Password (min. 8 characters)</value></data>
+  <data name="Setup_ConfirmPassword" xml:space="preserve"><value>Confirm password</value></data>
+  <data name="Setup_Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Setup_Create" xml:space="preserve"><value>Create vault</value></data>
+  <data name="Setup_PasswordMismatch" xml:space="preserve"><value>Passwords do not match.</value></data>
+  <data name="Dialog_Title" xml:space="preserve"><value>KEYRA</value></data>
+  <data name="Dialog_CopyPrivateKey" xml:space="preserve"><value>Copy the private key to the clipboard?\nClear the clipboard when finished.</value></data>
+  <data name="Dialog_RevealPrivateKey" xml:space="preserve"><value>Show the private key in the inspector?\nIt will hide automatically after about 15 seconds.</value></data>
+  <data name="Dialog_ExportOverwrite" xml:space="preserve"><value>Files already exist in the target folder. Overwrite?</value></data>
+  <data name="Dialog_ExportToSsh" xml:space="preserve"><value>Export '{0}' to:\n{1}\n\nauthorized_keys will not be modified.</value></data>
+  <data name="Dialog_SshOverwrite" xml:space="preserve"><value>A key with this file name already exists in .ssh. Overwrite?</value></data>
+  <data name="Dialog_DeleteKey" xml:space="preserve"><value>Delete key '{0}' from the vault?\nThis cannot be undone.</value></data>
+  <data name="Dialog_ExportFolderTitle" xml:space="preserve"><value>Export key pair to folder</value></data>
+  <data name="Log_AppStarted" xml:space="preserve"><value>KEYRA started.</value></data>
+  <data name="Log_VaultRefreshed" xml:space="preserve"><value>Vault refreshed ({0} keys).</value></data>
+  <data name="Log_CopiedPublic" xml:space="preserve"><value>Copied public key for '{0}'.</value></data>
+  <data name="Log_CopiedPrivate" xml:space="preserve"><value>Copied private key for '{0}' to clipboard.</value></data>
+  <data name="Log_RevealedPrivate" xml:space="preserve"><value>Revealed private key for '{0}' (auto-hide).</value></data>
+  <data name="Log_Exported" xml:space="preserve"><value>Exported '{0}' to {1}.</value></data>
+  <data name="Log_ExportedSsh" xml:space="preserve"><value>Exported '{0}' to .ssh.</value></data>
+  <data name="Log_Deleted" xml:space="preserve"><value>Deleted key '{0}'.</value></data>
+  <data name="Log_Generated" xml:space="preserve"><value>Generated {0} key '{1}' ({2}).</value></data>
+  <data name="Log_Imported" xml:space="preserve"><value>Imported key '{0}' ({1}).</value></data>
+  <data name="Log_SshConnected" xml:space="preserve"><value>SSH connected to {0}:{1}.</value></data>
+  <data name="Log_SshDisconnected" xml:space="preserve"><value>SSH disconnected.</value></data>
+  <data name="Log_VaultLocked" xml:space="preserve"><value>Vault locked.</value></data>
+  <data name="Log_OpenVault" xml:space="preserve"><value>Vault folder opened.</value></data>
+  <data name="Log_OpenRoot" xml:space="preserve"><value>App directory opened.</value></data>
+  <data name="Log_PasswordChanged" xml:space="preserve"><value>Vault password changed.</value></data>
+  <data name="Log_StartupFailed" xml:space="preserve"><value>Startup failed: {0}</value></data>
+  <data name="Reveal_HidingIn" xml:space="preserve"><value>Hiding in {0}s</value></data>
+  <data name="Algorithm_Ed25519" xml:space="preserve"><value>Ed25519</value></data>
+  <data name="Algorithm_Rsa4096" xml:space="preserve"><value>RSA 4096</value></data>
+  <data name="Connections_OutputError" xml:space="preserve"><value>[ERR] {0}</value></data>
+  <data name="Connections_Completing" xml:space="preserve"><value>Completing…</value></data>
+  <data name="Connections_CompletionFailed" xml:space="preserve"><value>Tab completion failed: {0}</value></data>
+  <data name="Connections_CompletionCancelled" xml:space="preserve"><value>cancelled</value></data>
+</root>

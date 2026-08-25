@@ -1,0 +1,62 @@
+<Window x:Class="SshKeyManager.Views.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:SshKeyManager.Views.Controls"
+        xmlns:helpers="clr-namespace:SshKeyManager.Helpers"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        Title="{Binding WindowTitle}"
+        Icon="pack://application:,,,/Assets/keyra-icon.ico"
+        Width="520"
+        Height="516"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        Background="{StaticResource BackgroundBrush}"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        WindowStyle="None">
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome CaptionHeight="36"
+                            ResizeBorderThickness="0"
+                            CornerRadius="8"
+                            GlassFrameThickness="0"
+                            UseAeroCaptionButtons="False" />
+    </shell:WindowChrome.WindowChrome>
+    <Border BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1"
+            Background="{StaticResource BackgroundBrush}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <controls:TitleBarControl Grid.Row="0"
+                                      Title="{Binding WindowTitle}"
+                                      ShowMinimizeButton="False"
+                                      ShowMaximizeButton="False"
+                                      ShowCloseButton="True" />
+
+            <Grid Grid.Row="1" Background="{StaticResource OverlayScrimBrush}">
+                <controls:AuthCardView Title="{Binding Title}"
+                                       Subtitle="{Binding Subtitle}"
+                                       ErrorMessage="{Binding ErrorMessage}"
+                                       IsBusy="{Binding IsBusy}"
+                                       PrimaryButtonContent="{Binding UnlockLabel}"
+                                       PrimaryButtonCommand="{Binding UnlockCommand}"
+                                       SecondaryButtonContent="{Binding ExitLabel}"
+                                       SecondaryClick="Exit_Click">
+                    <StackPanel>
+                        <TextBlock Text="{Binding UsernameLabel}" Style="{StaticResource LabelTextStyle}" />
+                        <TextBox Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="0,0,0,16" />
+
+                        <TextBlock Text="{Binding PasswordLabel}" Style="{StaticResource LabelTextStyle}" />
+                        <PasswordBox helpers:PasswordBoxHelper.BindPassword="True"
+                                     helpers:PasswordBoxHelper.BoundPassword="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Margin="0,0,0,16" />
+                    </StackPanel>
+                </controls:AuthCardView>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

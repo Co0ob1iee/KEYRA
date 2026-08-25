@@ -1,0 +1,29 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="Colors.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <DropShadowEffect x:Key="CardShadow"
+                      x:Shared="False"
+                      BlurRadius="14"
+                      ShadowDepth="0"
+                      Color="{StaticResource AccentColor}"
+                      Opacity="0.35" />
+
+    <DropShadowEffect x:Key="HoverGlowShadow"
+                      x:Shared="False"
+                      BlurRadius="14"
+                      ShadowDepth="0"
+                      Color="{StaticResource AccentColor}"
+                      Opacity="0.55" />
+
+    <DropShadowEffect x:Key="AuthCardShadow"
+                      x:Shared="False"
+                      BlurRadius="24"
+                      ShadowDepth="0"
+                      Color="{StaticResource ShadowColor}"
+                      Opacity="0.45" />
+
+</ResourceDictionary>
