@@ -196,6 +196,25 @@
   <data name="Settings_PasswordMismatch" xml:space="preserve"><value>New passwords do not match.</value></data>
   <data name="Settings_PasswordChanged" xml:space="preserve"><value>Password changed. Database key re-encrypted.</value></data>
   <data name="Settings_WrongPassword" xml:space="preserve"><value>Current password is incorrect.</value></data>
+  <data name="Settings_UpdatesTitle" xml:space="preserve"><value>Updates</value></data>
+  <data name="Settings_UpdatesHint" xml:space="preserve"><value>KEYRA checks GitHub Releases (public API). Set the repository owner after you publish. Prefers *-setup.exe assets, otherwise win-x64 zip.</value></data>
+  <data name="Settings_UpdatesOwner" xml:space="preserve"><value>GitHub owner (user/org)</value></data>
+  <data name="Settings_UpdatesRepo" xml:space="preserve"><value>Repository name</value></data>
+  <data name="Settings_UpdatesCheckOnStartup" xml:space="preserve"><value>Check for updates on startup</value></data>
+  <data name="Settings_UpdatesCheckNow" xml:space="preserve"><value>Check now</value></data>
+  <data name="Settings_UpdatesOpenRelease" xml:space="preserve"><value>Open release page</value></data>
+  <data name="Settings_UpdatesCurrentVersion" xml:space="preserve"><value>Installed version</value></data>
+  <data name="Settings_UpdatesChecking" xml:space="preserve"><value>Checking GitHub Releases…</value></data>
+  <data name="Settings_UpdatesNotConfigured" xml:space="preserve"><value>Set GitHub owner (and repo) to enable update checks.</value></data>
+  <data name="Settings_UpdatesUpToDate" xml:space="preserve"><value>You are on the latest version ({0}).</value></data>
+  <data name="Settings_UpdatesAvailable" xml:space="preserve"><value>Update {0} is available (you have {1}).</value></data>
+  <data name="Settings_UpdatesFailed" xml:space="preserve"><value>Update check failed: {0}</value></data>
+  <data name="Settings_UpdatesConfirmDownload" xml:space="preserve"><value>Download and run the KEYRA {0} installer?</value></data>
+  <data name="Settings_UpdatesConfirmOpenPage" xml:space="preserve"><value>No setup/zip asset on the release. Open the KEYRA {0} GitHub page?</value></data>
+  <data name="Settings_UpdatesZipReady" xml:space="preserve"><value>ZIP downloaded. Opened the temp folder — extract and replace the app manually.</value></data>
+  <data name="Settings_UpdatesDownloadFailed" xml:space="preserve"><value>Update download failed: {0}</value></data>
+  <data name="Log_UpdateCheckFailed" xml:space="preserve"><value>Update check failed: {0}</value></data>
+  <data name="Log_UpdateInstallerStarted" xml:space="preserve"><value>KEYRA update installer started.</value></data>
   <data name="Hardware_Title" xml:space="preserve"><value>Hardware security keys</value></data>
   <data name="Hardware_Pair" xml:space="preserve"><value>Pair new hardware key</value></data>
   <data name="Hardware_Refresh" xml:space="preserve"><value>Refresh</value></data>

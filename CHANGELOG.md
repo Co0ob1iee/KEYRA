@@ -13,6 +13,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [1.4.0] - 2026-08-25
+
+GitHub Releases updater for KEYRA installs.
+
+### Added
+
+- In-app updater: checks public GitHub Releases API, prefers `*-setup.exe`, falls back to win-x64 zip
+- Settings → Updates: GitHub owner/repo, check on startup, Check now, open release page, download progress
+- Quiet startup update prompt when owner is configured and a newer tag exists
+
+### Changed
+
+- Product version **1.4.0**
+
+### Known limitations
+
+- Requires a public GitHub repo with Releases; set owner in Settings after first publish
+- Private repos need a future token setting (not in 1.4.0)
+- Zip updates are manual extract (setup.exe is preferred for silent replace)
+
 ## [1.3.0] - 2026-08-25
 
 KEYRA ssh-agent CLI signing, PEM hygiene on connect, and honest sk-ed25519 session limits.
@@ -80,7 +100,8 @@ Initial public baseline. Bump with `scripts/bump-version.ps1` and set the date w
 - Localization (EN, PL, DE, FR, ZH, RU)
 - KEYRA branding and desktop status bar version from assembly metadata
 
-[Unreleased]: https://github.com/OWNER/KEYRA/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/OWNER/KEYRA/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/OWNER/KEYRA/releases/tag/v1.4.0
 [1.3.0]: https://github.com/OWNER/KEYRA/releases/tag/v1.3.0
 [1.1.0]: https://github.com/OWNER/KEYRA/releases/tag/v1.1.0
 [1.0.0]: https://github.com/OWNER/KEYRA/releases/tag/v1.0.0

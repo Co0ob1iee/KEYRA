@@ -91,6 +91,7 @@ public partial class MainViewModel : LocalizedViewModelBase
             StatusBar.SetVaultUnlocked();
             await TryStartAgentAsync().ConfigureAwait(true);
             _log.Info(L("Log_AppStarted"));
+            _ = Settings.CheckForUpdatesQuietAsync();
         }
         catch (Exception ex)
         {

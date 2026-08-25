@@ -44,4 +44,9 @@ public sealed class DialogService : IDialogService
     {
         MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Error);
     }
+
+    public void ShowInfo(string message, string title)
+    {
+        MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Information);
+    }
 }

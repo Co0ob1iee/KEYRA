@@ -1,8 +1,10 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using SshKeyManager.Models;
+using SshKeyManager.Presentation;
 using SshKeyManager.Services;
 using SshKeyManager.Services.Security;
+using SshKeyManager.Services.Update;
 
 namespace SshKeyManager.ViewModels;
 
@@ -13,9 +15,12 @@ public partial class SettingsViewModel : LocalizedViewModelBase
     private readonly IAppLogService _log;
     private readonly IVaultSecurityService _security;
     private readonly IAppSettingsService _settingsService;
+    private readonly IAppUpdateService _updates;
+    private readonly IDialogService _dialogs;
     private Action<string> _setStatus = _ => { };
     private Action _onCultureChanged = () => { };
     private bool _suppressLanguageChange;
+    private bool _suppressUpdateSettingsSave;
 
     public SettingsViewModel(
         IVaultStore vault,
@@ -24,6 +29,8 @@ public partial class SettingsViewModel : LocalizedViewModelBase
         IVaultSecurityService security,
         ILocalizationService localization,
         IAppSettingsService settingsService,
+        IAppUpdateService updates,
+        IDialogService dialogs,
         HardwareKeysViewModel hardware)
         : base(localization)
     {
@@ -32,6 +39,8 @@ public partial class SettingsViewModel : LocalizedViewModelBase
         _log = log ?? throw new ArgumentNullException(nameof(log));
         _security = security ?? throw new ArgumentNullException(nameof(security));
         _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
+        _updates = updates ?? throw new ArgumentNullException(nameof(updates));
+        _dialogs = dialogs ?? throw new ArgumentNullException(nameof(dialogs));
         Hardware = hardware ?? throw new ArgumentNullException(nameof(hardware));
 
         LanguageOptions = LanguageOption.All;
@@ -41,6 +50,15 @@ public partial class SettingsViewModel : LocalizedViewModelBase
             ?? LanguageOptions.First();
         _suppressLanguageChange = false;
 
+        _suppressUpdateSettingsSave = true;
+        UpdateGitHubOwner = _settingsService.Settings.UpdateGitHubOwner;
+        UpdateGitHubRepo = string.IsNullOrWhiteSpace(_settingsService.Settings.UpdateGitHubRepo)
+            ? "KEYRA"
+            : _settingsService.Settings.UpdateGitHubRepo;
+        CheckForUpdatesOnStartup = _settingsService.Settings.CheckForUpdatesOnStartup;
+        _suppressUpdateSettingsSave = false;
+
+        CurrentAppVersion = $"KEYRA v{_updates.GetCurrentVersion().ToString(3)}";
         RefreshPaths();
     }
 
@@ -101,6 +119,22 @@ public partial class SettingsViewModel : LocalizedViewModelBase
 
     public string SecurityHint => L("Settings_SecurityHint");
 
+    public string UpdatesTitle => L("Settings_UpdatesTitle");
+
+    public string UpdatesHint => L("Settings_UpdatesHint");
+
+    public string UpdatesOwnerLabel => L("Settings_UpdatesOwner");
+
+    public string UpdatesRepoLabel => L("Settings_UpdatesRepo");
+
+    public string UpdatesCheckOnStartupLabel => L("Settings_UpdatesCheckOnStartup");
+
+    public string UpdatesCheckNowLabel => L("Settings_UpdatesCheckNow");
+
+    public string UpdatesOpenReleaseLabel => L("Settings_UpdatesOpenRelease");
+
+    public string UpdatesCurrentVersionLabel => L("Settings_UpdatesCurrentVersion");
+
     [ObservableProperty]
     private string _vaultPath = string.Empty;
 
@@ -128,6 +162,33 @@ public partial class SettingsViewModel : LocalizedViewModelBase
     [ObservableProperty]
     private bool _isChangingPassword;
 
+    [ObservableProperty]
+    private string _updateGitHubOwner = string.Empty;
+
+    [ObservableProperty]
+    private string _updateGitHubRepo = "KEYRA";
+
+    [ObservableProperty]
+    private bool _checkForUpdatesOnStartup = true;
+
+    [ObservableProperty]
+    private string _currentAppVersion = string.Empty;
+
+    [ObservableProperty]
+    private string _updateStatusMessage = string.Empty;
+
+    [ObservableProperty]
+    private bool _isCheckingUpdates;
+
+    [ObservableProperty]
+    private bool _isApplyingUpdate;
+
+    [ObservableProperty]
+    private double _updateDownloadProgress;
+
+    [ObservableProperty]
+    private AppUpdateCheckResult? _lastUpdateCheck;
+
     partial void OnSelectedLanguageChanged(LanguageOption value)
     {
         if (_suppressLanguageChange || value is null)
@@ -136,6 +197,34 @@ public partial class SettingsViewModel : LocalizedViewModelBase
         }
 
         _ = ApplyLanguageChangeAsync(value.CultureName);
+    }
+
+    partial void OnUpdateGitHubOwnerChanged(string value) => _ = PersistUpdateSettingsAsync();
+
+    partial void OnUpdateGitHubRepoChanged(string value) => _ = PersistUpdateSettingsAsync();
+
+    partial void OnCheckForUpdatesOnStartupChanged(bool value) => _ = PersistUpdateSettingsAsync();
+
+    private async Task PersistUpdateSettingsAsync()
+    {
+        if (_suppressUpdateSettingsSave)
+        {
+            return;
+        }
+
+        try
+        {
+            _settingsService.Settings.UpdateGitHubOwner = (UpdateGitHubOwner ?? string.Empty).Trim();
+            _settingsService.Settings.UpdateGitHubRepo = string.IsNullOrWhiteSpace(UpdateGitHubRepo)
+                ? "KEYRA"
+                : UpdateGitHubRepo.Trim();
+            _settingsService.Settings.CheckForUpdatesOnStartup = CheckForUpdatesOnStartup;
+            await _settingsService.SaveAsync().ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            _log.Error(ex.Message);
+        }
     }
 
     private async Task ApplyLanguageChangeAsync(string cultureName)
@@ -172,6 +261,14 @@ public partial class SettingsViewModel : LocalizedViewModelBase
         OnPropertyChanged(nameof(SecurityTitle));
         OnPropertyChanged(nameof(SecurityHint));
         OnPropertyChanged(nameof(DatabasePathLabel));
+        OnPropertyChanged(nameof(UpdatesTitle));
+        OnPropertyChanged(nameof(UpdatesHint));
+        OnPropertyChanged(nameof(UpdatesOwnerLabel));
+        OnPropertyChanged(nameof(UpdatesRepoLabel));
+        OnPropertyChanged(nameof(UpdatesCheckOnStartupLabel));
+        OnPropertyChanged(nameof(UpdatesCheckNowLabel));
+        OnPropertyChanged(nameof(UpdatesOpenReleaseLabel));
+        OnPropertyChanged(nameof(UpdatesCurrentVersionLabel));
     }
 
     [RelayCommand]
@@ -257,4 +354,172 @@ public partial class SettingsViewModel : LocalizedViewModelBase
 
     partial void OnIsChangingPasswordChanged(bool value) =>
         ChangePasswordCommand.NotifyCanExecuteChanged();
+
+    [RelayCommand(CanExecute = nameof(CanCheckUpdates))]
+    private async Task CheckForUpdatesAsync()
+    {
+        await PersistUpdateSettingsAsync().ConfigureAwait(true);
+        IsCheckingUpdates = true;
+        UpdateStatusMessage = L("Settings_UpdatesChecking");
+        UpdateDownloadProgress = 0;
+        try
+        {
+            var result = await _updates.CheckForUpdatesAsync().ConfigureAwait(true);
+            LastUpdateCheck = result;
+            await HandleUpdateResultAsync(result, interactive: true).ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            UpdateStatusMessage = L("Settings_UpdatesFailed", ex.Message);
+            _log.Error(ex.Message);
+            _dialogs.ShowError(UpdateStatusMessage, L("Settings_UpdatesTitle"));
+        }
+        finally
+        {
+            IsCheckingUpdates = false;
+        }
+    }
+
+    private bool CanCheckUpdates() => !IsCheckingUpdates && !IsApplyingUpdate;
+
+    partial void OnIsCheckingUpdatesChanged(bool value)
+    {
+        CheckForUpdatesCommand.NotifyCanExecuteChanged();
+        OpenLastReleaseCommand.NotifyCanExecuteChanged();
+    }
+
+    partial void OnIsApplyingUpdateChanged(bool value)
+    {
+        CheckForUpdatesCommand.NotifyCanExecuteChanged();
+        OpenLastReleaseCommand.NotifyCanExecuteChanged();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanOpenLastRelease))]
+    private void OpenLastRelease()
+    {
+        if (LastUpdateCheck is null)
+        {
+            return;
+        }
+
+        _updates.OpenReleasePage(LastUpdateCheck);
+    }
+
+    private bool CanOpenLastRelease() =>
+        LastUpdateCheck is not null && !IsCheckingUpdates && !IsApplyingUpdate;
+
+    public async Task CheckForUpdatesQuietAsync()
+    {
+        if (!CheckForUpdatesOnStartup)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(UpdateGitHubOwner) || string.IsNullOrWhiteSpace(UpdateGitHubRepo))
+        {
+            return;
+        }
+
+        try
+        {
+            var result = await _updates.CheckForUpdatesAsync().ConfigureAwait(true);
+            LastUpdateCheck = result;
+            if (result.Status == AppUpdateStatus.UpdateAvailable)
+            {
+                await HandleUpdateResultAsync(result, interactive: true).ConfigureAwait(true);
+            }
+        }
+        catch (Exception ex)
+        {
+            _log.Error(L("Log_UpdateCheckFailed", ex.Message));
+        }
+    }
+
+    private async Task HandleUpdateResultAsync(AppUpdateCheckResult result, bool interactive)
+    {
+        switch (result.Status)
+        {
+            case AppUpdateStatus.NotConfigured:
+                UpdateStatusMessage = L("Settings_UpdatesNotConfigured");
+                if (interactive)
+                {
+                    _dialogs.ShowInfo(UpdateStatusMessage, L("Settings_UpdatesTitle"));
+                }
+
+                break;
+
+            case AppUpdateStatus.UpToDate:
+                UpdateStatusMessage = L(
+                    "Settings_UpdatesUpToDate",
+                    result.CurrentVersion?.ToString(3) ?? "?");
+                if (interactive)
+                {
+                    _dialogs.ShowInfo(UpdateStatusMessage, L("Settings_UpdatesTitle"));
+                }
+
+                _setStatus(UpdateStatusMessage);
+                break;
+
+            case AppUpdateStatus.Failed:
+                UpdateStatusMessage = L("Settings_UpdatesFailed", result.Message ?? string.Empty);
+                if (interactive)
+                {
+                    _dialogs.ShowError(UpdateStatusMessage, L("Settings_UpdatesTitle"));
+                }
+
+                break;
+
+            case AppUpdateStatus.UpdateAvailable:
+                UpdateStatusMessage = L(
+                    "Settings_UpdatesAvailable",
+                    result.LatestVersion?.ToString(3) ?? "?",
+                    result.CurrentVersion?.ToString(3) ?? "?");
+                _setStatus(UpdateStatusMessage);
+                _log.Info(UpdateStatusMessage);
+
+                var prompt = result.HasDownloadableAsset
+                    ? L("Settings_UpdatesConfirmDownload", result.LatestVersion?.ToString(3) ?? "?")
+                    : L("Settings_UpdatesConfirmOpenPage", result.LatestVersion?.ToString(3) ?? "?");
+
+                if (!_dialogs.Confirm(prompt, L("Settings_UpdatesTitle")))
+                {
+                    break;
+                }
+
+                if (!result.HasDownloadableAsset)
+                {
+                    _updates.OpenReleasePage(result);
+                    break;
+                }
+
+                IsApplyingUpdate = true;
+                try
+                {
+                    var progress = new Progress<double>(p => UpdateDownloadProgress = p);
+                    var shouldExit = await _updates.ApplyUpdateAsync(result, progress).ConfigureAwait(true);
+                    if (shouldExit)
+                    {
+                        _log.Info(L("Log_UpdateInstallerStarted"));
+                        System.Windows.Application.Current?.Shutdown();
+                    }
+                    else
+                    {
+                        UpdateStatusMessage = L("Settings_UpdatesZipReady");
+                        _dialogs.ShowInfo(UpdateStatusMessage, L("Settings_UpdatesTitle"));
+                    }
+                }
+                catch (Exception ex)
+                {
+                    UpdateStatusMessage = L("Settings_UpdatesDownloadFailed", ex.Message);
+                    _log.Error(ex.Message);
+                    _dialogs.ShowError(UpdateStatusMessage, L("Settings_UpdatesTitle"));
+                }
+                finally
+                {
+                    IsApplyingUpdate = false;
+                }
+
+                break;
+        }
+    }
 }

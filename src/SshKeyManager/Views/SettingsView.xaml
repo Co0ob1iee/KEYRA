@@ -157,7 +157,61 @@
                        Margin="0,8,0,6" />
             <TextBlock Text="{Binding SecurityHint}"
                        Style="{StaticResource MutedTextStyle}"
-                       TextWrapping="Wrap" />
+                       TextWrapping="Wrap"
+                       Margin="{StaticResource MarginFormCard}" />
+
+            <TextBlock Text="{Binding UpdatesTitle}"
+                       Style="{StaticResource SubsectionTitleStyle}"
+                       Margin="{StaticResource MarginSubsectionBottom}" />
+            <Border Style="{StaticResource FormCardStyle}">
+                <StackPanel>
+                    <TextBlock Text="{Binding UpdatesHint}"
+                               Style="{StaticResource MutedTextStyle}"
+                               Margin="{StaticResource MarginFieldBottom}"
+                               TextWrapping="Wrap" />
+
+                    <TextBlock Text="{Binding UpdatesCurrentVersionLabel}" Style="{StaticResource LabelTextStyle}" />
+                    <TextBlock Text="{Binding CurrentAppVersion}"
+                               Style="{StaticResource BodyTextStyle}"
+                               FontFamily="{StaticResource MonoFontFamily}"
+                               Margin="{StaticResource MarginFormCard}" />
+
+                    <TextBlock Text="{Binding UpdatesOwnerLabel}" Style="{StaticResource LabelTextStyle}" />
+                    <TextBox Text="{Binding UpdateGitHubOwner, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="{StaticResource MarginSubsectionBottom}" />
+
+                    <TextBlock Text="{Binding UpdatesRepoLabel}" Style="{StaticResource LabelTextStyle}" />
+                    <TextBox Text="{Binding UpdateGitHubRepo, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="{StaticResource MarginFormCard}" />
+
+                    <CheckBox Content="{Binding UpdatesCheckOnStartupLabel}"
+                              IsChecked="{Binding CheckForUpdatesOnStartup}"
+                              Foreground="{StaticResource TextPrimaryBrush}"
+                              Margin="{StaticResource MarginFormCard}" />
+
+                    <StackPanel Orientation="Horizontal" Margin="{StaticResource MarginFieldBottom}">
+                        <Button Content="{Binding UpdatesCheckNowLabel}"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Margin="0,0,8,0"
+                                Command="{Binding CheckForUpdatesCommand}" />
+                        <Button Content="{Binding UpdatesOpenReleaseLabel}"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Command="{Binding OpenLastReleaseCommand}" />
+                    </StackPanel>
+
+                    <ProgressBar Height="6"
+                                 Minimum="0"
+                                 Maximum="1"
+                                 Value="{Binding UpdateDownloadProgress}"
+                                 Margin="{StaticResource MarginFieldBottom}"
+                                 Visibility="{Binding IsApplyingUpdate, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                    <TextBlock Text="{Binding UpdateStatusMessage}"
+                               Style="{StaticResource MutedTextStyle}"
+                               TextWrapping="Wrap"
+                               Visibility="{Binding UpdateStatusMessage, Converter={StaticResource NullToVisibilityConverter}}" />
+                </StackPanel>
+            </Border>
         </StackPanel>
     </ScrollViewer>
 </UserControl>

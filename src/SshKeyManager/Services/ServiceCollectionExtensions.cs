@@ -5,6 +5,7 @@ using SshKeyManager.Services.Data;
 using SshKeyManager.Services.Hardware;
 using SshKeyManager.Services.Security;
 using SshKeyManager.Services.Ssh;
+using SshKeyManager.Services.Update;
 using SshKeyManager.ViewModels;
 
 namespace SshKeyManager.Services;
@@ -39,6 +40,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ISshAgentClient, WindowsOpenSshAgentClient>();
         services.AddSingleton<IKeyraAgentProvider, KeyraAgentProvider>();
         services.AddSingleton<IHardwareKeyService, HardwareKeyService>();
+        services.AddSingleton<IAppUpdateService, GitHubAppUpdateService>();
         services.AddSingleton<HardwareKeysViewModel>();
         services.AddTransient<SetupViewModel>();
         services.AddTransient<LoginViewModel>();

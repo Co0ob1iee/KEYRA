@@ -196,6 +196,25 @@
   <data name="Settings_PasswordMismatch" xml:space="preserve"><value>Nowe hasła nie są identyczne.</value></data>
   <data name="Settings_PasswordChanged" xml:space="preserve"><value>Hasło zostało zmienione. Klucz główny przeszyfrowano.</value></data>
   <data name="Settings_WrongPassword" xml:space="preserve"><value>Bieżące hasło jest nieprawidłowe.</value></data>
+  <data name="Settings_UpdatesTitle" xml:space="preserve"><value>Aktualizacje</value></data>
+  <data name="Settings_UpdatesHint" xml:space="preserve"><value>KEYRA sprawdza GitHub Releases (publiczne API). Wpisz właściciela repozytorium po opublikowaniu projektu. Preferowany asset: *-setup.exe, inaczej zip win-x64.</value></data>
+  <data name="Settings_UpdatesOwner" xml:space="preserve"><value>GitHub owner (użytkownik/org)</value></data>
+  <data name="Settings_UpdatesRepo" xml:space="preserve"><value>Nazwa repozytorium</value></data>
+  <data name="Settings_UpdatesCheckOnStartup" xml:space="preserve"><value>Sprawdzaj aktualizacje przy starcie</value></data>
+  <data name="Settings_UpdatesCheckNow" xml:space="preserve"><value>Sprawdź teraz</value></data>
+  <data name="Settings_UpdatesOpenRelease" xml:space="preserve"><value>Otwórz stronę release</value></data>
+  <data name="Settings_UpdatesCurrentVersion" xml:space="preserve"><value>Zainstalowana wersja</value></data>
+  <data name="Settings_UpdatesChecking" xml:space="preserve"><value>Sprawdzanie GitHub Releases…</value></data>
+  <data name="Settings_UpdatesNotConfigured" xml:space="preserve"><value>Uzupełnij GitHub owner (i repo), aby sprawdzać aktualizacje.</value></data>
+  <data name="Settings_UpdatesUpToDate" xml:space="preserve"><value>Masz najnowszą wersję ({0}).</value></data>
+  <data name="Settings_UpdatesAvailable" xml:space="preserve"><value>Dostępna aktualizacja {0} (masz {1}).</value></data>
+  <data name="Settings_UpdatesFailed" xml:space="preserve"><value>Nie udało się sprawdzić aktualizacji: {0}</value></data>
+  <data name="Settings_UpdatesConfirmDownload" xml:space="preserve"><value>Pobrać i uruchomić instalator KEYRA {0}?</value></data>
+  <data name="Settings_UpdatesConfirmOpenPage" xml:space="preserve"><value>Brak pliku setup/zip w release. Otworzyć stronę KEYRA {0} na GitHubie?</value></data>
+  <data name="Settings_UpdatesZipReady" xml:space="preserve"><value>Pobrano archiwum ZIP. Otworzono folder tymczasowy — rozpakuj i zastąp aplikację ręcznie.</value></data>
+  <data name="Settings_UpdatesDownloadFailed" xml:space="preserve"><value>Pobieranie aktualizacji nie powiodło się: {0}</value></data>
+  <data name="Log_UpdateCheckFailed" xml:space="preserve"><value>Sprawdzanie aktualizacji nie powiodło się: {0}</value></data>
+  <data name="Log_UpdateInstallerStarted" xml:space="preserve"><value>Uruchomiono instalator aktualizacji KEYRA.</value></data>
   <data name="Hardware_Title" xml:space="preserve"><value>Klucze sprzętowe</value></data>
   <data name="Hardware_Pair" xml:space="preserve"><value>Sparuj nowy klucz sprzętowy</value></data>
   <data name="Hardware_Refresh" xml:space="preserve"><value>Odśwież</value></data>

@@ -11,7 +11,7 @@ Product version is centralized in [`Directory.Build.props`](Directory.Build.prop
 | `Version` / `InformationalVersion` | `1.3.0` | SemVer (status bar: `KEYRA v1.3.0`) |
 | `AssemblyVersion` / `FileVersion` | `1.3.0.0` | Win32 / assembly four-part version |
 
-**Current:** `1.3.0`. Bump before each subsequent release.
+**Current:** `1.4.0`. Bump before each subsequent release.
 
 ```powershell
 # Preferred — updates Directory.Build.props + CHANGELOG stub
@@ -100,6 +100,17 @@ Output:
 - `KEYRA-x.y.z-win-x64.zip`
 
 Attach both on GitHub → Releases → Edit → attach files.
+
+## In-app updater
+
+After the repo is public on GitHub:
+
+1. Open KEYRA → **Settings → Updates**
+2. Set **GitHub owner** to your username/org (repo defaults to `KEYRA`)
+3. Enable **Check for updates on startup** (optional)
+4. Click **Check now**
+
+The updater reads `/repos/{owner}/{KEYRA}/releases/latest`, compares SemVer with the installed InformationalVersion, and prefers `*-setup.exe` assets from the Release (see workflow / `scripts/publish.ps1`).
 
 ## Do not commit
 
