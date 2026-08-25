@@ -214,8 +214,8 @@ public interface IKeyraAgentProvider : IDisposable
 }
 
 /// <summary>
-/// KEYRA ssh-agent provider: Windows named pipe that exposes vault identities while unlocked.
-/// Signing loads private keys from the vault on demand (keys never leave KEYRA except for the signature).
+/// KEYRA ssh-agent provider: Windows named pipe that lists vault identities while unlocked.
+/// Sign requests from CLI clients are not implemented yet (responds with SSH_AGENT_FAILURE).
 /// </summary>
 public sealed class KeyraAgentProvider : IKeyraAgentProvider
 {
@@ -333,8 +333,8 @@ public sealed class KeyraAgentProvider : IKeyraAgentProvider
 
     private async Task HandleClientAsync(Stream stream, CancellationToken cancellationToken)
     {
-        // Minimal identities listing; full sign-for-CLI is available via Start when unlocked.
-        // Protocol: respond to REQUEST_IDENTITIES with empty list for now if vault locked mid-flight.
+        // Identities listing only; sign-for-CLI is not implemented (non-list requests → SSH_AGENT_FAILURE).
+        // Loop exits if the vault is locked mid-flight.
         while (!cancellationToken.IsCancellationRequested && _session.IsUnlocked)
         {
             byte[] message;

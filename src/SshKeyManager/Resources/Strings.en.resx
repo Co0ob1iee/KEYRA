@@ -208,10 +208,11 @@
   <data name="Hardware_TestFail" xml:space="preserve"><value>Hardware key test failed.</value></data>
   <data name="Hardware_ConfirmDelete" xml:space="preserve"><value>Remove hardware key '{0}' from the vault?</value></data>
   <data name="Hardware_AgentTitle" xml:space="preserve"><value>SSH agent</value></data>
+  <data name="Hardware_AgentHint" xml:space="preserve"><value>KEYRA agent lists vault identities on its named pipe while unlocked. Signing for CLI (ssh/git) is not available yet.</value></data>
   <data name="Hardware_StartAgent" xml:space="preserve"><value>Start KEYRA agent</value></data>
   <data name="Hardware_StopAgent" xml:space="preserve"><value>Stop KEYRA agent</value></data>
   <data name="Hardware_ListSystemAgent" xml:space="preserve"><value>List system agent keys</value></data>
-  <data name="Hardware_AgentStarted" xml:space="preserve"><value>KEYRA agent listening on \\.\pipe\{0}</value></data>
+  <data name="Hardware_AgentStarted" xml:space="preserve"><value>KEYRA agent listening on \\.\pipe\{0} (identities list only; signing not available yet)</value></data>
   <data name="Hardware_AgentStopped" xml:space="preserve"><value>KEYRA agent stopped.</value></data>
   <data name="Hardware_SystemAgentMissing" xml:space="preserve"><value>Windows OpenSSH agent is not available.</value></data>
   <data name="Hardware_SystemAgentCount" xml:space="preserve"><value>System agent identities: {0}</value></data>

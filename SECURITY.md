@@ -32,6 +32,7 @@ KEYRA stores sensitive data under Local Application Data. **Never** add these to
 | Path (under `%LocalAppData%\SshKeyManager\`) | Content |
 | -------------------------------------------- | ------- |
 | `keyra.db` | SQLite vault (encrypted private keys + metadata) |
+| `keyra.db-wal` / `keyra.db-shm` / `*.db-journal` | SQLite WAL/shared-memory/journal sidecars |
 | `KeyGarageHash` | Vault integrity HMAC (alongside DB) |
 | `master.key.enc` | Legacy encrypted master key (pre-1.1; migrated on unlock) |
 | `vault\*.key.enc` | Legacy encrypted private keys |
@@ -43,8 +44,9 @@ Also never commit:
 - Plaintext private keys (`.pem`, OpenSSH private key files)
 - Passwords, passphrases, or API tokens
 - `*.user` / user secrets files
+- Any SQLite vault copy (`keyra.db`, `*.db`, `*.db-wal`, `*.db-shm`, `*.db-journal`)
 
-The repository `.gitignore` already excludes these patterns. If you accidentally commit vault material, rotate affected keys immediately and scrub history before publishing.
+The repository `.gitignore` excludes these vault/database patterns (`keyra.db`, `*.db`, `*.db-wal`, `*.db-shm`, `*.db-journal`, plus legacy vault files). If you accidentally commit vault material, rotate affected keys immediately and scrub history before publishing.
 
 ## Security model (summary)
 

@@ -50,6 +50,11 @@ artifacts/
 !**/Assets/**
 
 ## KEYRA vault / runtime data (NEVER commit)
+keyra.db
+*.db
+*.db-wal
+*.db-shm
+*.db-journal
 **/master.key.enc
 **/KeyGarageHash
 **/connections.json
@@ -71,6 +76,7 @@ Desktop.ini
 ## Publish / release drop folders
 /dist/
 /release/
+/keyra-setup.iss
 *.zip
 !docs/**/*.zip
 

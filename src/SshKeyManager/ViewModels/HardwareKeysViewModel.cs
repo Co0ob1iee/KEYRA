@@ -61,6 +61,8 @@ public partial class HardwareKeysViewModel : LocalizedViewModelBase
 
     public string AgentSectionTitle => L("Hardware_AgentTitle");
 
+    public string AgentHint => L("Hardware_AgentHint");
+
     public string StartAgentLabel => L("Hardware_StartAgent");
 
     public string StopAgentLabel => L("Hardware_StopAgent");
@@ -90,6 +92,7 @@ public partial class HardwareKeysViewModel : LocalizedViewModelBase
         OnPropertyChanged(nameof(DeleteLabel));
         OnPropertyChanged(nameof(AvailabilityText));
         OnPropertyChanged(nameof(AgentSectionTitle));
+        OnPropertyChanged(nameof(AgentHint));
         OnPropertyChanged(nameof(StartAgentLabel));
         OnPropertyChanged(nameof(StopAgentLabel));
         OnPropertyChanged(nameof(ListSystemAgentLabel));

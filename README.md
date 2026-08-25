@@ -16,7 +16,7 @@
 - **Key management** — Ed25519 / RSA / ECDSA P-384 generate & import; FIDO2 sk-ed25519 pairing when OpenSSH is available
 - **Servers & audit** — profiles in SQLite with connection SUCCESS/FAILED/TIMEOUT logs
 - **JumpHost** — bastion direct-tcpip (Key A) then end-to-end target auth (Key B)
-- **SSH agent** — Windows OpenSSH agent client + optional KEYRA agent pipe while unlocked
+- **SSH agent** — Windows OpenSSH agent client + optional KEYRA agent pipe (identity listing while unlocked; CLI signing not available yet)
 - **Multi-session SSH** — separate windows per session
 - **ANSI terminal** — JetBrains Mono, color-aware terminal UI
 - **i18n** — 6 languages (EN, PL locales via resources + DE / FR / ZH / RU locale packs)
@@ -69,6 +69,11 @@ dist/win-x64/
 
 Zip `dist/win-x64` (or attach the folder contents) when creating a GitHub Release.
 
+Pushing a git tag `v*` runs [`.github/workflows/release.yml`](.github/workflows/release.yml), which publishes:
+
+- `KEYRA-vX.Y.Z-win-x64.zip` — portable self-contained folder
+- `KEYRA-X.Y.Z-win-x64-setup.exe` — per-user installer (Start menu, optional desktop shortcut, uninstaller; no admin/UAC). Vault data in `%LocalAppData%\SshKeyManager\` is **not** removed on uninstall.
+
 ## Security model
 
 | Piece | Details |
@@ -94,7 +99,7 @@ KEYRA/
   README.md
   SECURITY.md
   PUBLISH.md                 # GitHub Desktop + release checklist
-  .github/workflows/         # tag v* → publish win-x64
+  .github/workflows/         # tag v* → zip + Setup.exe
   src/
     SshKeyManager/           # WPF app (namespaces: SshKeyManager)
       Assets/                # keyra-logo.png, keyra-icon.ico

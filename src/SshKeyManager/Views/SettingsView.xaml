@@ -129,6 +129,10 @@
                     <TextBlock Text="{Binding AgentSectionTitle}"
                                Style="{StaticResource LabelTextStyle}"
                                Margin="0,8,0,6" />
+                    <TextBlock Text="{Binding AgentHint}"
+                               Style="{StaticResource MutedTextStyle}"
+                               TextWrapping="Wrap"
+                               Margin="{StaticResource MarginFieldBottom}" />
                     <StackPanel Orientation="Horizontal" Margin="{StaticResource MarginFieldBottom}">
                         <Button Content="{Binding StartAgentLabel}"
                                 Style="{StaticResource SecondaryButtonStyle}"

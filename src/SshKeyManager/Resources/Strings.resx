@@ -208,10 +208,11 @@
   <data name="Hardware_TestFail" xml:space="preserve"><value>Test klucza sprzętowego nie powiódł się.</value></data>
   <data name="Hardware_ConfirmDelete" xml:space="preserve"><value>Usunąć klucz sprzętowy '{0}' z sejfu?</value></data>
   <data name="Hardware_AgentTitle" xml:space="preserve"><value>Agent SSH</value></data>
+  <data name="Hardware_AgentHint" xml:space="preserve"><value>Agent KEYRA udostępnia listę tożsamości z sejfu na named pipe, gdy sejf jest odblokowany. Podpisywanie dla CLI (ssh/git) nie jest jeszcze dostępne.</value></data>
   <data name="Hardware_StartAgent" xml:space="preserve"><value>Uruchom agenta KEYRA</value></data>
   <data name="Hardware_StopAgent" xml:space="preserve"><value>Zatrzymaj agenta KEYRA</value></data>
   <data name="Hardware_ListSystemAgent" xml:space="preserve"><value>Pokaż klucze agenta systemowego</value></data>
-  <data name="Hardware_AgentStarted" xml:space="preserve"><value>Agent KEYRA nasłuchuje na \\.\pipe\{0}</value></data>
+  <data name="Hardware_AgentStarted" xml:space="preserve"><value>Agent KEYRA nasłuchuje na \\.\pipe\{0} (tylko lista tożsamości; podpisywanie niedostępne)</value></data>
   <data name="Hardware_AgentStopped" xml:space="preserve"><value>Agent KEYRA zatrzymany.</value></data>
   <data name="Hardware_SystemAgentMissing" xml:space="preserve"><value>Agent Windows OpenSSH jest niedostępny.</value></data>
   <data name="Hardware_SystemAgentCount" xml:space="preserve"><value>Tożsamości agenta systemowego: {0}</value></data>

@@ -70,7 +70,7 @@ For every GitHub Release (example: `1.0.0`):
    dotnet publish src/SshKeyManager/SshKeyManager.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o dist/win-x64
    ```
 
-5. Zip `dist\win-x64` as `KEYRA-1.0.0-win-x64.zip` (match the SemVer).
+5. Zip `dist\win-x64` as `KEYRA-1.0.0-win-x64.zip` (match the SemVer). If you push tag `v1.0.0`, Actions also builds `KEYRA-1.0.0-win-x64-setup.exe` (Inno Setup, per-user, no admin).
 
 6. **GitHub Desktop:**
    - Commit version + changelog + any code changes
@@ -80,10 +80,13 @@ For every GitHub Release (example: `1.0.0`):
 7. On github.com → **Releases → Draft a new release**
    - Choose tag `v1.0.0`
    - Title / notes from CHANGELOG
-   - Attach `KEYRA-1.0.0-win-x64.zip`
+   - Attach `KEYRA-1.0.0-win-x64.zip` (skip if the Release workflow already uploaded artifacts)
    - Publish release
 
-Optional: pushing tag `v*` also runs [`.github/workflows/release.yml`](.github/workflows/release.yml), which publishes a win-x64 zip to the GitHub Release automatically (when Actions are enabled on the repo).
+Pushing tag `v*` runs [`.github/workflows/release.yml`](.github/workflows/release.yml) (when Actions are enabled). It attaches:
+
+- `KEYRA-vX.Y.Z-win-x64.zip`
+- `KEYRA-X.Y.Z-win-x64-setup.exe` (per-user installer; vault files are kept on uninstall)
 
 ## Do not commit
 

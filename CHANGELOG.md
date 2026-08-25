@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Windows per-user installer (`KEYRA-x.y.z-win-x64-setup.exe`) built by GitHub Actions on each `v*` tag (Inno Setup: Start menu, optional desktop shortcut, uninstaller; vault data is not deleted)
+
 ### Changed
 
 ### Fixed
@@ -24,7 +26,7 @@ Platform upgrade aligning KEYRA with the New_Update_KEYRA architecture (SQLite e
 - One-time migration from legacy JSON vault (`master.key.enc` / `vault/*.key.enc` / `connections.json`)
 - Connection audit logs (SUCCESS / FAILED / TIMEOUT) on connect
 - Jump host (bastion) via SSH.NET `ForwardedPortLocal` / direct-tcpip (Key A → Key B)
-- Windows OpenSSH agent client (Named Pipe) + KEYRA agent provider pipe while vault is unlocked
+- Windows OpenSSH agent client (Named Pipe) + KEYRA agent provider pipe (identity listing while unlocked; CLI signing not yet)
 - Hardware security keys panel: FIDO2 `sk-ed25519` pairing via OpenSSH `ssh-keygen -t ed25519-sk` when available
 - ECDSA P-384 key generation; `key_type` model includes `ed25519`, `rsa_4096`, `ecdsa_p384`, `sk-ed25519`
 - Embedded Inter (UI) + JetBrains Mono (terminal); KEY/RA typographic wordmark
@@ -40,7 +42,6 @@ Platform upgrade aligning KEYRA with the New_Update_KEYRA architecture (SQLite e
 - KEYRA agent provider currently answers identity listing; full agent sign-for-CLI is not complete
 - PKCS#11 / PIV YubiKey slots are not implemented (planned)
 - FIDO2 pairing requires Windows OpenSSH `ssh-keygen` on PATH and a connected authenticator
-- NU1903 advisory on transitive `SQLitePCLRaw.lib.e_sqlite3` 2.1.11 (Microsoft.Data.Sqlite 10.0.0)
 
 ## [1.0.0] - Unreleased
 
