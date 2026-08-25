@@ -85,11 +85,14 @@ See [SECURITY.md](SECURITY.md) for reporting issues and what must never be commi
 ```text
 KEYRA/
   KEYRA.sln
-  Directory.Build.props      # Version 1.0.0, Product KEYRA
+  Directory.Build.props      # SemVer 1.0.0 (single source of truth)
+  CHANGELOG.md               # Keep a Changelog
+  scripts/bump-version.ps1   # pwsh … -Part patch|minor|major
   LICENSE                    # MIT
   README.md
   SECURITY.md
-  PUBLISH.md                 # GitHub Desktop publish steps
+  PUBLISH.md                 # GitHub Desktop + release checklist
+  .github/workflows/         # tag v* → publish win-x64
   src/
     SshKeyManager/           # WPF app (namespaces: SshKeyManager)
       Assets/                # keyra-logo.png, keyra-icon.ico
@@ -97,6 +100,16 @@ KEYRA/
       Services/              # Vault, SSH, security, i18n
       Resources/             # Themes, locales, strings
 ```
+
+### Version bump
+
+Edit only [`Directory.Build.props`](Directory.Build.props), or run:
+
+```powershell
+pwsh scripts/bump-version.ps1 -Part patch
+```
+
+See [PUBLISH.md](PUBLISH.md) and [CHANGELOG.md](CHANGELOG.md).
 
 ## Contributing
 

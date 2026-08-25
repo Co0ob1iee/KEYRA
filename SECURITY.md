@@ -17,7 +17,7 @@ Instead:
 
 Include:
 
-- KEYRA version (`KEYRA vX.Y` in the status bar)
+- KEYRA version (`KEYRA vX.Y.Z` in the status bar)
 - OS version (Windows 10 / 11)
 - Steps to reproduce
 - Impact assessment (e.g. vault unlock bypass, key material leak)

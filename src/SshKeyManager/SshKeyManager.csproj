@@ -8,17 +8,9 @@
     <UseWPF>true</UseWPF>
     <ApplicationIcon>Assets\keyra-icon.ico</ApplicationIcon>
     <AssemblyTitle>KEYRA</AssemblyTitle>
-    <Product>KEYRA</Product>
     <AssemblyName>SshKeyManager</AssemblyName>
     <RootNamespace>SshKeyManager</RootNamespace>
-    <Version>1.0.0</Version>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
-    <InformationalVersion>1.0.0</InformationalVersion>
-    <Company>KEYRA</Company>
-    <Authors>KEYRA</Authors>
-    <Description>KEYRA — desktop SSH key vault and SSH client for Windows</Description>
-    <Copyright>Copyright (c) 2026 KEYRA contributors</Copyright>
+    <!-- Version / AssemblyVersion / FileVersion / InformationalVersion: Directory.Build.props -->
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>

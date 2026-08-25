@@ -2,6 +2,28 @@
 
 The repository at `S:\source\KEYRA` already has an initial local git commit. You do **not** need the `gh` CLI.
 
+## Versioning
+
+Product version is centralized in [`Directory.Build.props`](Directory.Build.props):
+
+| Property | Example | Role |
+| -------- | ------- | ---- |
+| `Version` / `InformationalVersion` | `1.0.0` | SemVer (status bar: `KEYRA v1.0.0`) |
+| `AssemblyVersion` / `FileVersion` | `1.0.0.0` | Win32 / assembly four-part version |
+
+**Baseline:** `1.0.0` (first release). Bump before each subsequent release.
+
+```powershell
+# Preferred — updates Directory.Build.props + CHANGELOG stub
+pwsh scripts/bump-version.ps1 -Part patch   # 1.0.0 → 1.0.1
+pwsh scripts/bump-version.ps1 -Part minor   # 1.0.1 → 1.1.0
+pwsh scripts/bump-version.ps1 -Part major   # 1.1.0 → 2.0.0
+```
+
+Or edit the four version properties in `Directory.Build.props` only (do not put versions back in the `.csproj`).
+
+Keep [`CHANGELOG.md`](CHANGELOG.md) in [Keep a Changelog](https://keepachangelog.com/) format.
+
 ## 1. Add the local repository
 
 1. Open [GitHub Desktop](https://desktop.github.com/)
@@ -23,20 +45,45 @@ If `git` is not on your PATH, that is fine — GitHub Desktop bundles its own Gi
 6. Choose your GitHub account / org
 7. Click **Publish repository**
 
-## 3. Create a GitHub Release (optional)
+## 3. Release checklist
 
-1. Build a distributable:
+For every GitHub Release (example: `1.0.0`):
 
-```powershell
-cd S:\source\KEYRA
-dotnet publish src/SshKeyManager/SshKeyManager.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o dist/win-x64
-```
+1. **Bump version** (skip bump on the very first `1.0.0` if props already say `1.0.0`):
 
-2. Zip `dist\win-x64` (e.g. `KEYRA-1.0.0-win-x64.zip`)
-3. On github.com → your KEYRA repo → **Releases → Draft a new release**
-4. Tag: `v1.0.0`
-5. Attach the zip
-6. Publish release
+   ```powershell
+   pwsh scripts/bump-version.ps1 -Part patch
+   ```
+
+2. **Update CHANGELOG** — fill Added / Changed / Fixed under `[x.y.z]`, set the date, move notes out of `[Unreleased]` as needed.
+
+3. **Build Release** and confirm it succeeds:
+
+   ```powershell
+   cd S:\source\KEYRA
+   dotnet build KEYRA.sln -c Release
+   ```
+
+4. **Publish** self-contained win-x64:
+
+   ```powershell
+   dotnet publish src/SshKeyManager/SshKeyManager.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o dist/win-x64
+   ```
+
+5. Zip `dist\win-x64` as `KEYRA-1.0.0-win-x64.zip` (match the SemVer).
+
+6. **GitHub Desktop:**
+   - Commit version + changelog + any code changes
+   - Create tag `v1.0.0` (Repository → Create tag…, or tag after commit)
+   - Push commits **and** tags to `origin`
+
+7. On github.com → **Releases → Draft a new release**
+   - Choose tag `v1.0.0`
+   - Title / notes from CHANGELOG
+   - Attach `KEYRA-1.0.0-win-x64.zip`
+   - Publish release
+
+Optional: pushing tag `v*` also runs [`.github/workflows/release.yml`](.github/workflows/release.yml), which publishes a win-x64 zip to the GitHub Release automatically (when Actions are enabled on the repo).
 
 ## Do not commit
 

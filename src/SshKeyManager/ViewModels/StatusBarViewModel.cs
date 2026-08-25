@@ -116,12 +116,32 @@ public partial class StatusBarViewModel : LocalizedViewModelBase
     {
         try
         {
-            var version = Assembly.GetExecutingAssembly().GetName().Version;
-            return version is null ? "KEYRA v1.0" : $"KEYRA v{version.Major}.{version.Minor}";
+            var assembly = Assembly.GetExecutingAssembly();
+            var informational = assembly
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                ?.InformationalVersion;
+
+            if (!string.IsNullOrWhiteSpace(informational))
+            {
+                // Strip optional +build metadata from InformationalVersion.
+                var semVer = informational.Split('+', 2)[0].Trim();
+                if (semVer.Length > 0)
+                {
+                    return $"KEYRA v{semVer}";
+                }
+            }
+
+            var version = assembly.GetName().Version;
+            if (version is not null)
+            {
+                return $"KEYRA v{version.Major}.{version.Minor}.{Math.Max(version.Build, 0)}";
+            }
         }
         catch (Exception)
         {
-            return "KEYRA v1.0";
+            // Fall through.
         }
+
+        return "KEYRA";
     }
 }
