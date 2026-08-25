@@ -9,14 +9,9 @@ The repository at `S:\source\KEYRA` already has an initial local git commit. You
 3. Choose folder: `S:\source\KEYRA`
 4. Confirm / add
 
-If Desktop says the directory is not a Git repository, run once in PowerShell:
+The folder already contains a `.git` directory and an initial commit on branch `main`. Prefer **Add local repository** (do not “create” a second empty repo on top of it).
 
-```powershell
-cd S:\source\KEYRA
-git status
-```
-
-(There should already be a commit; if `git` is missing from PATH, use GitHub Desktop’s “create a repository” only on an empty folder — prefer **Add local repository** on this existing repo.)
+If `git` is not on your PATH, that is fine — GitHub Desktop bundles its own Git.
 
 ## 2. Publish as a public GitHub repo
 
