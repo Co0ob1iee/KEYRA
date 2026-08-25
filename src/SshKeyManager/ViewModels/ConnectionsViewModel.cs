@@ -348,6 +348,12 @@ public partial class ConnectionsViewModel : LocalizedViewModelBase
             return;
         }
 
+        if (!UsePasswordAuth && SelectedKey?.Algorithm == SshKeyAlgorithm.SkEd25519)
+        {
+            _dialogs.ShowError(L("Connections_ErrSkKeyNotSupported"), L("Dialog_Title"));
+            return;
+        }
+
         IsBusy = true;
         ConnectCommand.NotifyCanExecuteChanged();
         try
@@ -366,6 +372,12 @@ public partial class ConnectionsViewModel : LocalizedViewModelBase
                 if (jumpKey is null)
                 {
                     _dialogs.ShowError(L("Connections_ErrJumpKey"), L("Dialog_Title"));
+                    return;
+                }
+
+                if (jumpKey.Algorithm == SshKeyAlgorithm.SkEd25519)
+                {
+                    _dialogs.ShowError(L("Connections_ErrSkKeyNotSupported"), L("Dialog_Title"));
                     return;
                 }
             }

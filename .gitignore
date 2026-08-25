@@ -76,6 +76,7 @@ Desktop.ini
 ## Publish / release drop folders
 /dist/
 /release/
+/.tools/
 /keyra-setup.iss
 *.zip
 !docs/**/*.zip

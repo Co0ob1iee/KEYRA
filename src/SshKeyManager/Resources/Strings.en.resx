@@ -175,6 +175,7 @@
   <data name="Connections_ErrJumpKey" xml:space="preserve"><value>Jump host must use a vault SSH key (Key A).</value></data>
   <data name="Connections_ErrJumpSelf" xml:space="preserve"><value>A profile cannot use itself as jump host.</value></data>
   <data name="Connections_ErrTimeout" xml:space="preserve"><value>Connection cancelled or timed out.</value></data>
+  <data name="Connections_ErrSkKeyNotSupported" xml:space="preserve"><value>FIDO2 sk-ed25519 keys cannot be used for KEYRA in-app SSH sessions (SSH.NET has no hardware SK auth). Pair them for OpenSSH CLI / system agent use, or choose a software vault key.</value></data>
   <data name="Settings_Title" xml:space="preserve"><value>Settings</value></data>
   <data name="Settings_Info" xml:space="preserve"><value>Private keys are encrypted with AES-256-GCM under a Database Key (DBK). Your master password derives a MEK via Argon2id (envelope encryption). KeyGarageHash plus GCM tags verify integrity. Private key material is never written to the operation log.</value></data>
   <data name="Settings_RootPath" xml:space="preserve"><value>App directory (vault)</value></data>
@@ -208,11 +209,11 @@
   <data name="Hardware_TestFail" xml:space="preserve"><value>Hardware key test failed.</value></data>
   <data name="Hardware_ConfirmDelete" xml:space="preserve"><value>Remove hardware key '{0}' from the vault?</value></data>
   <data name="Hardware_AgentTitle" xml:space="preserve"><value>SSH agent</value></data>
-  <data name="Hardware_AgentHint" xml:space="preserve"><value>KEYRA agent lists vault identities on its named pipe while unlocked. Signing for CLI (ssh/git) is not available yet.</value></data>
+  <data name="Hardware_AgentHint" xml:space="preserve"><value>KEYRA agent exposes vault identities on \\.\pipe\keyra-ssh-agent while unlocked and signs for OpenSSH/git (Ed25519, RSA, ECDSA). FIDO2 sk-ed25519 and passphrase-protected keys are listed but cannot be signed here.</value></data>
   <data name="Hardware_StartAgent" xml:space="preserve"><value>Start KEYRA agent</value></data>
   <data name="Hardware_StopAgent" xml:space="preserve"><value>Stop KEYRA agent</value></data>
   <data name="Hardware_ListSystemAgent" xml:space="preserve"><value>List system agent keys</value></data>
-  <data name="Hardware_AgentStarted" xml:space="preserve"><value>KEYRA agent listening on \\.\pipe\{0} (identities list only; signing not available yet)</value></data>
+  <data name="Hardware_AgentStarted" xml:space="preserve"><value>KEYRA agent listening on \\.\pipe\{0} (list + sign for software keys)</value></data>
   <data name="Hardware_AgentStopped" xml:space="preserve"><value>KEYRA agent stopped.</value></data>
   <data name="Hardware_SystemAgentMissing" xml:space="preserve"><value>Windows OpenSSH agent is not available.</value></data>
   <data name="Hardware_SystemAgentCount" xml:space="preserve"><value>System agent identities: {0}</value></data>

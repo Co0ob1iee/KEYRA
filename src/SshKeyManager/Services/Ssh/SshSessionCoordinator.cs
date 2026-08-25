@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using SshKeyManager.Helpers;
 using SshKeyManager.Models;
 using SshKeyManager.Services.Data;
+using SshKeyManager.Services.Security;
 
 namespace SshKeyManager.Services.Ssh;
 
@@ -82,14 +83,21 @@ public sealed partial class SshSessionCoordinator : ObservableObject, ISshSessio
             return;
         }
 
-        if (jumpHost is not null && jumpHostKey is null && !usePasswordAuth)
+        if (!usePasswordAuth && selectedKey?.Algorithm == SshKeyAlgorithm.SkEd25519)
         {
-            // Jump with password auth on target still needs a bastion key for KEYRA jump.
+            AppendOutput(L("Connections_ErrSkKeyNotSupported"), isError: true);
+            return;
         }
 
         if (jumpHost is not null && jumpHostKey is null)
         {
             AppendOutput(L("Connections_ErrJumpKey"), isError: true);
+            return;
+        }
+
+        if (jumpHostKey?.Algorithm == SshKeyAlgorithm.SkEd25519)
+        {
+            AppendOutput(L("Connections_ErrSkKeyNotSupported"), isError: true);
             return;
         }
 
@@ -105,9 +113,11 @@ public sealed partial class SshSessionCoordinator : ObservableObject, ISshSessio
             {
                 using var jumpMaterial = await _vault.LoadPrivateKeyAsync(jumpHostKey!.Id, _sessionCts.Token)
                     .ConfigureAwait(true);
+                string? jumpPem = null;
                 string? targetPem = null;
                 try
                 {
+                    jumpPem = jumpMaterial.GetPrivateKeyPem();
                     if (!usePasswordAuth)
                     {
                         using var targetMaterial = await _vault
@@ -120,7 +130,7 @@ public sealed partial class SshSessionCoordinator : ObservableObject, ISshSessio
                         jumpHost.Host.Trim(),
                         jumpHost.Port,
                         jumpHost.Username.Trim(),
-                        jumpMaterial.GetPrivateKeyPem(),
+                        jumpPem,
                         string.IsNullOrWhiteSpace(jumpHostKeyPassphrase) ? null : jumpHostKeyPassphrase,
                         host.Trim(),
                         port,
@@ -133,7 +143,8 @@ public sealed partial class SshSessionCoordinator : ObservableObject, ISshSessio
                 }
                 finally
                 {
-                    // targetPem cleared by GC; SecureKeyMaterial already disposed.
+                    SecureMemory.MemzeroUtf8Copy(ref jumpPem);
+                    SecureMemory.MemzeroUtf8Copy(ref targetPem);
                 }
             }
             else if (usePasswordAuth)
@@ -149,13 +160,22 @@ public sealed partial class SshSessionCoordinator : ObservableObject, ISshSessio
             {
                 using var material = await _vault.LoadPrivateKeyAsync(selectedKey!.Id, _sessionCts.Token)
                     .ConfigureAwait(true);
-                await _ssh.ConnectWithKeyAsync(
-                    host.Trim(),
-                    port,
-                    username.Trim(),
-                    material.GetPrivateKeyPem(),
-                    string.IsNullOrWhiteSpace(keyPassphrase) ? null : keyPassphrase,
-                    _sessionCts.Token).ConfigureAwait(true);
+                string? pem = null;
+                try
+                {
+                    pem = material.GetPrivateKeyPem();
+                    await _ssh.ConnectWithKeyAsync(
+                        host.Trim(),
+                        port,
+                        username.Trim(),
+                        pem,
+                        string.IsNullOrWhiteSpace(keyPassphrase) ? null : keyPassphrase,
+                        _sessionCts.Token).ConfigureAwait(true);
+                }
+                finally
+                {
+                    SecureMemory.MemzeroUtf8Copy(ref pem);
+                }
             }
 
             _log.Info($"SSH connected to {host}:{port}.");

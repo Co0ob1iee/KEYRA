@@ -13,10 +13,10 @@
 ## Features
 
 - **Encrypted SQLite vault** — Argon2id MEK → envelope DBK → AES-256-GCM + KeyGarageHash
-- **Key management** — Ed25519 / RSA / ECDSA P-384 generate & import; FIDO2 sk-ed25519 pairing when OpenSSH is available
+- **Key management** — Ed25519 / RSA / ECDSA P-384 generate & import; FIDO2 sk-ed25519 pairing when OpenSSH is available (in-app SSH sessions cannot use sk keys — use OpenSSH CLI)
 - **Servers & audit** — profiles in SQLite with connection SUCCESS/FAILED/TIMEOUT logs
 - **JumpHost** — bastion direct-tcpip (Key A) then end-to-end target auth (Key B)
-- **SSH agent** — Windows OpenSSH agent client + optional KEYRA agent pipe (identity listing while unlocked; CLI signing not available yet)
+- **SSH agent** — Windows OpenSSH agent client + KEYRA agent pipe (`\\.\pipe\keyra-ssh-agent`) that lists and signs vault software keys while unlocked (sk-ed25519 / passphrase keys: list only)
 - **Multi-session SSH** — separate windows per session
 - **ANSI terminal** — JetBrains Mono, color-aware terminal UI
 - **i18n** — 6 languages (EN, PL locales via resources + DE / FR / ZH / RU locale packs)

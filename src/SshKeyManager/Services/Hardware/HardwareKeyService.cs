@@ -66,8 +66,10 @@ public sealed class HardwareKeyService : IHardwareKeyService
     public bool IsFido2PairingAvailable => FindSshKeygen() is not null;
 
     public string AvailabilityMessage => IsFido2PairingAvailable
-        ? "FIDO2 pairing uses OpenSSH ssh-keygen (ed25519-sk). Touch the security key when prompted."
-        : "FIDO2 pairing requires OpenSSH ssh-keygen on PATH (Windows OpenSSH). Install OpenSSH Client, then retry. PKCS#11 PIV is planned for a later release.";
+        ? "FIDO2 pairing uses OpenSSH ssh-keygen (ed25519-sk). Touch the security key when prompted. "
+          + "Paired keys are for OpenSSH CLI / system agent auth — KEYRA in-app SSH sessions cannot perform FIDO2 SK authentication (SSH.NET limitation)."
+        : "FIDO2 pairing requires OpenSSH ssh-keygen on PATH (Windows OpenSSH). Install OpenSSH Client, then retry. "
+          + "PKCS#11 PIV is planned for a later release. In-app SSH connect does not support sk-ed25519.";
 
     public async Task<IReadOnlyList<HardwareSecurityKeyInfo>> ListAsync(CancellationToken cancellationToken = default)
     {

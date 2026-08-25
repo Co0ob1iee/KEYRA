@@ -8,10 +8,10 @@ Product version is centralized in [`Directory.Build.props`](Directory.Build.prop
 
 | Property | Example | Role |
 | -------- | ------- | ---- |
-| `Version` / `InformationalVersion` | `1.0.0` | SemVer (status bar: `KEYRA v1.0.0`) |
-| `AssemblyVersion` / `FileVersion` | `1.0.0.0` | Win32 / assembly four-part version |
+| `Version` / `InformationalVersion` | `1.3.0` | SemVer (status bar: `KEYRA v1.3.0`) |
+| `AssemblyVersion` / `FileVersion` | `1.3.0.0` | Win32 / assembly four-part version |
 
-**Baseline:** `1.0.0` (first release). Bump before each subsequent release.
+**Current:** `1.3.0`. Bump before each subsequent release.
 
 ```powershell
 # Preferred — updates Directory.Build.props + CHANGELOG stub
@@ -87,6 +87,19 @@ Pushing tag `v*` runs [`.github/workflows/release.yml`](.github/workflows/releas
 
 - `KEYRA-vX.Y.Z-win-x64.zip`
 - `KEYRA-X.Y.Z-win-x64-setup.exe` (per-user installer; vault files are kept on uninstall)
+
+If GitHub Actions is unavailable, build zip + Setup.exe on this PC:
+
+```powershell
+pwsh scripts/publish.ps1
+```
+
+Output:
+
+- `dist\installer\KEYRA-x.y.z-win-x64-setup.exe`
+- `KEYRA-x.y.z-win-x64.zip`
+
+Attach both on GitHub → Releases → Edit → attach files.
 
 ## Do not commit
 

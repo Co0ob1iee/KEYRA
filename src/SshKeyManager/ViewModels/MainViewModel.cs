@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using SshKeyManager.Models;
 using SshKeyManager.Presentation;
 using SshKeyManager.Services;
+using SshKeyManager.Services.Agent;
 using SshKeyManager.Services.Security;
 using SshKeyManager.Services.Ssh;
 using System.ComponentModel;
@@ -16,6 +17,7 @@ public partial class MainViewModel : LocalizedViewModelBase
     private readonly IVaultSecurityService _security;
     private readonly INavigationService _navigation;
     private readonly ISshSessionWindowService _sessions;
+    private readonly IKeyraAgentProvider _agent;
 
     public MainViewModel(
         KeysViewModel keys,
@@ -28,7 +30,8 @@ public partial class MainViewModel : LocalizedViewModelBase
         ILocalizationService localization,
         INavigationService navigation,
         IShellLayoutService layout,
-        ISshSessionWindowService sessions)
+        ISshSessionWindowService sessions,
+        IKeyraAgentProvider agent)
         : base(localization)
     {
         Keys = keys ?? throw new ArgumentNullException(nameof(keys));
@@ -40,6 +43,7 @@ public partial class MainViewModel : LocalizedViewModelBase
         _security = security ?? throw new ArgumentNullException(nameof(security));
         _navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));
         _sessions = sessions ?? throw new ArgumentNullException(nameof(sessions));
+        _agent = agent ?? throw new ArgumentNullException(nameof(agent));
 
         StatusBar = new StatusBarViewModel(localization, sessions);
         LogPanel = new LogPanelViewModel(log, localization, layout, StatusBar.SetStatus);
@@ -85,6 +89,7 @@ public partial class MainViewModel : LocalizedViewModelBase
             StatusBar.SetKeyCount(Keys.Keys.Count);
             StatusBar.SetStatus(L("Status_Ready"));
             StatusBar.SetVaultUnlocked();
+            await TryStartAgentAsync().ConfigureAwait(true);
             _log.Info(L("Log_AppStarted"));
         }
         catch (Exception ex)
@@ -100,6 +105,7 @@ public partial class MainViewModel : LocalizedViewModelBase
         try
         {
             await _sessions.DisconnectAllAsync().ConfigureAwait(true);
+            await TryStopAgentAsync().ConfigureAwait(true);
             _security.Lock();
             _log.Info(L("Log_VaultLocked"));
             RequestRelogin?.Invoke(this, EventArgs.Empty);
@@ -146,4 +152,29 @@ public partial class MainViewModel : LocalizedViewModelBase
         LogRowHeight = LogPanel.IsExpanded
             ? new GridLength(Math.Max(80, LogPanel.PanelHeight))
             : new GridLength(28);
+
+    private async Task TryStartAgentAsync()
+    {
+        try
+        {
+            await _agent.StartAsync().ConfigureAwait(true);
+            _log.Info($"KEYRA ssh-agent auto-started on \\\\.\\pipe\\{_agent.PipeName}");
+        }
+        catch (Exception ex)
+        {
+            _log.Error($"KEYRA ssh-agent auto-start failed: {ex.Message}");
+        }
+    }
+
+    private async Task TryStopAgentAsync()
+    {
+        try
+        {
+            await _agent.StopAsync().ConfigureAwait(true);
+        }
+        catch (Exception)
+        {
+            // Best-effort stop on vault lock.
+        }
+    }
 }

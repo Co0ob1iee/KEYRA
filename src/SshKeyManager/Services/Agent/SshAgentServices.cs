@@ -2,6 +2,7 @@ using System.Buffers.Binary;
 using System.IO.Pipes;
 using System.Security.Cryptography;
 using System.Text;
+using SshKeyManager.Models;
 using SshKeyManager.Services.Security;
 
 namespace SshKeyManager.Services.Agent;
@@ -214,12 +215,19 @@ public interface IKeyraAgentProvider : IDisposable
 }
 
 /// <summary>
-/// KEYRA ssh-agent provider: Windows named pipe that lists vault identities while unlocked.
-/// Sign requests from CLI clients are not implemented yet (responds with SSH_AGENT_FAILURE).
+/// KEYRA ssh-agent provider: Windows named pipe that lists vault identities and signs
+/// challenges for Ed25519 / RSA / ECDSA keys while the vault is unlocked.
+/// FIDO2 sk-ed25519 and passphrase-protected keys return SSH_AGENT_FAILURE.
 /// </summary>
 public sealed class KeyraAgentProvider : IKeyraAgentProvider
 {
     public const string DefaultPipeName = "keyra-ssh-agent";
+
+    private const byte SshAgentFailure = 5;
+    private const byte SshAgentIdentitiesAnswer = 12;
+    private const byte SshAgentSignResponse = 14;
+    private const byte SshAgentcRequestIdentities = 11;
+    private const byte SshAgentcSignRequest = 13;
 
     private readonly IVaultSession _session;
     private readonly IVaultStore _vault;
@@ -254,7 +262,7 @@ public sealed class KeyraAgentProvider : IKeyraAgentProvider
 
         _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         _listenTask = Task.Run(() => ListenLoopAsync(_cts.Token), CancellationToken.None);
-        _log.Info($"KEYRA ssh-agent listening on \\\\.\\pipe\\{PipeName}");
+        _log.Info($"KEYRA ssh-agent listening on \\\\.\\pipe\\{PipeName} (list + sign)");
         return Task.CompletedTask;
     }
 
@@ -333,7 +341,6 @@ public sealed class KeyraAgentProvider : IKeyraAgentProvider
 
     private async Task HandleClientAsync(Stream stream, CancellationToken cancellationToken)
     {
-        // Identities listing only; sign-for-CLI is not implemented (non-list requests → SSH_AGENT_FAILURE).
         // Loop exits if the vault is locked mid-flight.
         while (!cancellationToken.IsCancellationRequested && _session.IsUnlocked)
         {
@@ -353,27 +360,146 @@ public sealed class KeyraAgentProvider : IKeyraAgentProvider
                 break;
             }
 
-            if (message[0] == 11) // REQUEST_IDENTITIES
+            try
             {
-                var keys = await _vault.ListAsync(cancellationToken).ConfigureAwait(false);
-                using var ms = new MemoryStream();
-                ms.WriteByte(12); // IDENTITIES_ANSWER
-                WriteUInt32(ms, (uint)keys.Count);
-                foreach (var key in keys)
+                switch (message[0])
                 {
-                    var blob = DecodePublicKeyBlob(key.PublicKey);
-                    WriteString(ms, blob);
-                    WriteString(ms, Encoding.UTF8.GetBytes(key.Name));
+                    case SshAgentcRequestIdentities:
+                        await WriteIdentitiesAnswerAsync(stream, cancellationToken).ConfigureAwait(false);
+                        break;
+                    case SshAgentcSignRequest:
+                        await WriteSignResponseAsync(stream, message, cancellationToken).ConfigureAwait(false);
+                        break;
+                    default:
+                        await WindowsOpenSshAgentClientRead.WriteMessageAsync(stream, [SshAgentFailure], cancellationToken)
+                            .ConfigureAwait(false);
+                        break;
                 }
-
-                await WindowsOpenSshAgentClientRead.WriteMessageAsync(stream, ms.ToArray(), cancellationToken)
-                    .ConfigureAwait(false);
             }
-            else
+            catch (Exception ex) when (ex is not OperationCanceledException and not EndOfStreamException)
             {
-                await WindowsOpenSshAgentClientRead.WriteMessageAsync(stream, [5], cancellationToken)
-                    .ConfigureAwait(false);
+                _log.Error($"KEYRA agent request failed: {ex.Message}");
+                try
+                {
+                    await WindowsOpenSshAgentClientRead.WriteMessageAsync(stream, [SshAgentFailure], cancellationToken)
+                        .ConfigureAwait(false);
+                }
+                catch
+                {
+                    break;
+                }
             }
+        }
+    }
+
+    private async Task WriteIdentitiesAnswerAsync(Stream stream, CancellationToken cancellationToken)
+    {
+        var keys = await _vault.ListAsync(cancellationToken).ConfigureAwait(false);
+        using var ms = new MemoryStream();
+        ms.WriteByte(SshAgentIdentitiesAnswer);
+        WriteUInt32(ms, (uint)keys.Count);
+        foreach (var key in keys)
+        {
+            var blob = DecodePublicKeyBlob(key.PublicKey);
+            WriteString(ms, blob);
+            WriteString(ms, Encoding.UTF8.GetBytes(key.Name));
+        }
+
+        await WindowsOpenSshAgentClientRead.WriteMessageAsync(stream, ms.ToArray(), cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    private async Task WriteSignResponseAsync(Stream stream, byte[] message, CancellationToken cancellationToken)
+    {
+        var offset = 1;
+        var keyBlob = ReadString(message, ref offset);
+        var data = ReadString(message, ref offset);
+        var flags = offset + 4 <= message.Length ? ReadUInt32(message, ref offset) : 0u;
+
+        byte[]? signature = null;
+        try
+        {
+            signature = await TrySignAsync(keyBlob, data, flags, cancellationToken).ConfigureAwait(false);
+            if (signature is null)
+            {
+                await WindowsOpenSshAgentClientRead.WriteMessageAsync(stream, [SshAgentFailure], cancellationToken)
+                    .ConfigureAwait(false);
+                return;
+            }
+
+            using var ms = new MemoryStream();
+            ms.WriteByte(SshAgentSignResponse);
+            WriteString(ms, signature);
+            await WindowsOpenSshAgentClientRead.WriteMessageAsync(stream, ms.ToArray(), cancellationToken)
+                .ConfigureAwait(false);
+        }
+        finally
+        {
+            SecureMemory.Memzero(signature);
+        }
+    }
+
+    private async Task<byte[]?> TrySignAsync(
+        byte[] keyBlob,
+        byte[] data,
+        uint flags,
+        CancellationToken cancellationToken)
+    {
+        if (!_session.IsUnlocked || keyBlob.Length == 0)
+        {
+            return null;
+        }
+
+        var keys = await _vault.ListAsync(cancellationToken).ConfigureAwait(false);
+        SshKeyRecord? match = null;
+        foreach (var key in keys)
+        {
+            var blob = DecodePublicKeyBlob(key.PublicKey);
+            if (blob.Length == keyBlob.Length && blob.AsSpan().SequenceEqual(keyBlob))
+            {
+                match = key;
+                break;
+            }
+        }
+
+        if (match is null)
+        {
+            return null;
+        }
+
+        if (match.Algorithm == SshKeyAlgorithm.SkEd25519)
+        {
+            _log.Info($"KEYRA agent refused sign for sk-ed25519 key '{match.Name}' (use OpenSSH CLI + FIDO2).");
+            return null;
+        }
+
+        if (match.HasPassphrase)
+        {
+            _log.Info($"KEYRA agent refused sign for passphrase-protected key '{match.Name}'.");
+            return null;
+        }
+
+        using var material = await _vault.LoadPrivateKeyAsync(match.Id, cancellationToken).ConfigureAwait(false);
+        var pem = material.GetPrivateKeyPem();
+        byte[]? pemUtf8 = null;
+        try
+        {
+            pemUtf8 = Encoding.UTF8.GetBytes(pem);
+            return SshAgentSigner.Sign(pem, passphrase: null, data, flags);
+        }
+        catch (NotSupportedException ex)
+        {
+            _log.Info($"KEYRA agent sign unsupported for '{match.Name}': {ex.Message}");
+            return null;
+        }
+        catch (Exception ex)
+        {
+            _log.Error($"KEYRA agent sign failed for '{match.Name}': {ex.Message}");
+            return null;
+        }
+        finally
+        {
+            SecureMemory.Memzero(pemUtf8);
         }
     }
 
@@ -385,7 +511,34 @@ public sealed class KeyraAgentProvider : IKeyraAgentProvider
             return [];
         }
 
-        return Convert.FromBase64String(parts[1]);
+        try
+        {
+            return Convert.FromBase64String(parts[1]);
+        }
+        catch (FormatException)
+        {
+            return [];
+        }
+    }
+
+    private static uint ReadUInt32(byte[] buffer, ref int offset)
+    {
+        var value = BinaryPrimitives.ReadUInt32BigEndian(buffer.AsSpan(offset, 4));
+        offset += 4;
+        return value;
+    }
+
+    private static byte[] ReadString(byte[] buffer, ref int offset)
+    {
+        var length = (int)ReadUInt32(buffer, ref offset);
+        if (length < 0 || offset + length > buffer.Length)
+        {
+            throw new InvalidDataException("Invalid agent string length.");
+        }
+
+        var data = buffer.AsSpan(offset, length).ToArray();
+        offset += length;
+        return data;
     }
 
     private static void WriteUInt32(Stream stream, uint value)

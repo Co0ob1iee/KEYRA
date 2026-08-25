@@ -9,11 +9,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Windows per-user installer (`KEYRA-x.y.z-win-x64-setup.exe`) built by GitHub Actions on each `v*` tag (Inno Setup: Start menu, optional desktop shortcut, uninstaller; vault data is not deleted)
-
 ### Changed
 
 ### Fixed
+
+## [1.3.0] - 2026-08-25
+
+KEYRA ssh-agent CLI signing, PEM hygiene on connect, and honest sk-ed25519 session limits.
+
+### Added
+
+- KEYRA agent provider signs OpenSSH/git challenges over `\\.\pipe\keyra-ssh-agent` while the vault is unlocked (Ed25519, RSA including SHA-2 flags, ECDSA P-256/P-384/P-521)
+- Agent auto-starts on vault unlock and stops on vault lock / app exit
+- Clear in-app error when connecting with FIDO2 `sk-ed25519` keys (SSH.NET cannot perform hardware SK auth)
+
+### Changed
+
+- Temporary private-key PEM copies used during SSH connect are wiped via `SecureMemory` after authentication (jump and direct paths)
+- Hardware / agent UI copy updated: list **and** sign for software keys; sk-ed25519 and passphrase-protected keys remain list-only for the KEYRA agent
+- Hardware panel documents that paired sk keys are for OpenSSH CLI / system agent, not KEYRA terminal sessions
+
+### Fixed
+
+- Misleading “list only / signing not available yet” agent strings from 1.1.0
+
+### Known limitations
+
+- FIDO2 `sk-ed25519` and passphrase-protected vault keys: KEYRA agent returns `SSH_AGENT_FAILURE` on sign (no interactive passphrase / FIDO touch in-process)
+- In-app SSH sessions cannot authenticate with sk-ed25519 (use OpenSSH CLI or a software key)
+- PKCS#11 / PIV YubiKey slots are not implemented
 
 ## [1.1.0] - 2026-08-25
 
@@ -56,6 +80,7 @@ Initial public baseline. Bump with `scripts/bump-version.ps1` and set the date w
 - Localization (EN, PL, DE, FR, ZH, RU)
 - KEYRA branding and desktop status bar version from assembly metadata
 
-[Unreleased]: https://github.com/OWNER/KEYRA/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/OWNER/KEYRA/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/OWNER/KEYRA/releases/tag/v1.3.0
 [1.1.0]: https://github.com/OWNER/KEYRA/releases/tag/v1.1.0
 [1.0.0]: https://github.com/OWNER/KEYRA/releases/tag/v1.0.0

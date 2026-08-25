@@ -175,6 +175,7 @@
   <data name="Connections_ErrJumpKey" xml:space="preserve"><value>Jump host musi używać klucza z sejfu (klucz A).</value></data>
   <data name="Connections_ErrJumpSelf" xml:space="preserve"><value>Profil nie może być swoim własnym jump hostem.</value></data>
   <data name="Connections_ErrTimeout" xml:space="preserve"><value>Połączenie anulowane lub przekroczono czas.</value></data>
+  <data name="Connections_ErrSkKeyNotSupported" xml:space="preserve"><value>Kluczy FIDO2 sk-ed25519 nie można użyć w sesjach SSH w KEYRA (SSH.NET nie obsługuje auth sprzętowego SK). Sparuj je do użycia z OpenSSH CLI / agentem systemowym albo wybierz klucz programowy z sejfu.</value></data>
   <data name="Settings_Title" xml:space="preserve"><value>Ustawienia</value></data>
   <data name="Settings_Info" xml:space="preserve"><value>Klucze prywatne są szyfrowane AES-256-GCM kluczem bazy (DBK). Hasło mastera wyprowadza MEK przez Argon2id (szyfrowanie kopertowe). KeyGarageHash i tagi GCM weryfikują integralność. Materiał klucza prywatnego nigdy nie trafia do logu operacji.</value></data>
   <data name="Settings_RootPath" xml:space="preserve"><value>Katalog aplikacji (sejf)</value></data>
@@ -208,11 +209,11 @@
   <data name="Hardware_TestFail" xml:space="preserve"><value>Test klucza sprzętowego nie powiódł się.</value></data>
   <data name="Hardware_ConfirmDelete" xml:space="preserve"><value>Usunąć klucz sprzętowy '{0}' z sejfu?</value></data>
   <data name="Hardware_AgentTitle" xml:space="preserve"><value>Agent SSH</value></data>
-  <data name="Hardware_AgentHint" xml:space="preserve"><value>Agent KEYRA udostępnia listę tożsamości z sejfu na named pipe, gdy sejf jest odblokowany. Podpisywanie dla CLI (ssh/git) nie jest jeszcze dostępne.</value></data>
+  <data name="Hardware_AgentHint" xml:space="preserve"><value>Agent KEYRA udostępnia tożsamości z sejfu na \\.\pipe\keyra-ssh-agent gdy sejf jest odblokowany i podpisuje dla OpenSSH/git (Ed25519, RSA, ECDSA). Klucze FIDO2 sk-ed25519 oraz chronione hasłem są listowane, ale nie mogą być tu podpisywane.</value></data>
   <data name="Hardware_StartAgent" xml:space="preserve"><value>Uruchom agenta KEYRA</value></data>
   <data name="Hardware_StopAgent" xml:space="preserve"><value>Zatrzymaj agenta KEYRA</value></data>
   <data name="Hardware_ListSystemAgent" xml:space="preserve"><value>Pokaż klucze agenta systemowego</value></data>
-  <data name="Hardware_AgentStarted" xml:space="preserve"><value>Agent KEYRA nasłuchuje na \\.\pipe\{0} (tylko lista tożsamości; podpisywanie niedostępne)</value></data>
+  <data name="Hardware_AgentStarted" xml:space="preserve"><value>Agent KEYRA nasłuchuje na \\.\pipe\{0} (lista + podpis dla kluczy programowych)</value></data>
   <data name="Hardware_AgentStopped" xml:space="preserve"><value>Agent KEYRA zatrzymany.</value></data>
   <data name="Hardware_SystemAgentMissing" xml:space="preserve"><value>Agent Windows OpenSSH jest niedostępny.</value></data>
   <data name="Hardware_SystemAgentCount" xml:space="preserve"><value>Tożsamości agenta systemowego: {0}</value></data>

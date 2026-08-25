@@ -120,6 +120,16 @@ public partial class App : Application
         {
             _mainWindow?.Hide();
             var security = Services.GetRequiredService<IVaultSecurityService>();
+            try
+            {
+                await (Services.GetService<IKeyraAgentProvider>()?.StopAsync() ?? Task.CompletedTask)
+                    .ConfigureAwait(true);
+            }
+            catch (Exception)
+            {
+                // Best-effort agent stop before lock.
+            }
+
             security.Lock();
 
             if (await EnsureVaultUnlockedAsync().ConfigureAwait(true))

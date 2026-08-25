@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace SshKeyManager.Services.Security;
 
@@ -132,5 +133,32 @@ internal static class SecureMemory
         }
 
         CryptographicOperations.ZeroMemory(buffer);
+    }
+
+    public static void Memzero(char[]? buffer)
+    {
+        if (buffer is null || buffer.Length == 0)
+        {
+            return;
+        }
+
+        Array.Clear(buffer, 0, buffer.Length);
+    }
+
+    /// <summary>
+    /// Best-effort wipe of a temporary UTF-8 encoding of a secret string.
+    /// The immutable <see cref="string"/> itself cannot be cleared.
+    /// </summary>
+    public static void MemzeroUtf8Copy(ref string? secret)
+    {
+        if (string.IsNullOrEmpty(secret))
+        {
+            secret = null;
+            return;
+        }
+
+        var bytes = Encoding.UTF8.GetBytes(secret);
+        CryptographicOperations.ZeroMemory(bytes);
+        secret = null;
     }
 }
