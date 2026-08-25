@@ -41,7 +41,7 @@
                             <TextBlock Text="{Binding FingerprintLabel}" Style="{StaticResource LabelTextStyle}" />
                             <TextBox Text="{Binding SelectedRecord.Fingerprint, Mode=OneWay}"
                                      IsReadOnly="True"
-                                     FontFamily="Consolas"
+                                     FontFamily="{StaticResource MonoFontFamily}"
                                      FontSize="{StaticResource FontSizeCaption}"
                                      TextWrapping="Wrap"
                                      Margin="0,0,0,16" />
@@ -56,7 +56,7 @@
                                      IsReadOnly="True"
                                      TextWrapping="Wrap"
                                      Height="90"
-                                     FontFamily="Consolas"
+                                     FontFamily="{StaticResource MonoFontFamily}"
                                      FontSize="{StaticResource FontSizeMono}"
                                      VerticalScrollBarVisibility="Auto"
                                      Margin="0,0,0,16" />
@@ -122,7 +122,7 @@
                                              IsReadOnly="True"
                                              TextWrapping="Wrap"
                                              Height="140"
-                                             FontFamily="Consolas"
+                                             FontFamily="{StaticResource MonoFontFamily}"
                                              FontSize="{StaticResource FontSizeMono}"
                                              VerticalScrollBarVisibility="Auto" />
                                     <Button Content="{Binding HideNowLabel}"

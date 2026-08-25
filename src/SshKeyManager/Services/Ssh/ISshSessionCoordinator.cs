@@ -24,7 +24,11 @@ public interface ISshSessionCoordinator : INotifyPropertyChanged
         bool usePasswordAuth,
         string password,
         SshKeyRecord? selectedKey,
-        string keyPassphrase);
+        string keyPassphrase,
+        Guid? auditServerId = null,
+        SshConnectionProfile? jumpHost = null,
+        SshKeyRecord? jumpHostKey = null,
+        string jumpHostKeyPassphrase = "");
 
     Task DisconnectAsync();
 

@@ -32,12 +32,10 @@
                            Stretch="UniformToFill"
                            RenderOptions.BitmapScalingMode="HighQuality" />
                 </Border>
-                <TextBlock Text="{Binding Title, ElementName=Root}"
-                           Foreground="{StaticResource TextPrimaryBrush}"
-                           FontSize="13"
-                           FontWeight="SemiBold"
-                           VerticalAlignment="Center"
-                           TextTrimming="CharacterEllipsis" />
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="KEY" Style="{StaticResource BrandKeyStyle}" VerticalAlignment="Center" />
+                    <TextBlock Text="RA" Style="{StaticResource BrandRaStyle}" VerticalAlignment="Center" Margin="1,0,0,0" />
+                </StackPanel>
             </StackPanel>
 
             <StackPanel Grid.Column="1"

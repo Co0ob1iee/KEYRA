@@ -3,6 +3,7 @@ using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using SshKeyManager.Helpers;
 using SshKeyManager.Models;
+using SshKeyManager.Services.Data;
 
 namespace SshKeyManager.Services.Ssh;
 
@@ -12,21 +13,25 @@ public sealed partial class SshSessionCoordinator : ObservableObject, ISshSessio
     private readonly IVaultStore _vault;
     private readonly IAppLogService _log;
     private readonly ILocalizationService _localization;
+    private readonly IConnectionAuditService _audit;
     private Action<string> _setStatus = _ => { };
     private CancellationTokenSource? _sessionCts;
     private readonly StringBuilder _outputBuilder = new();
+    private Guid? _auditServerId;
     private bool _disposed;
 
     public SshSessionCoordinator(
         ISshConnectionService ssh,
         IVaultStore vault,
         IAppLogService log,
-        ILocalizationService localization)
+        ILocalizationService localization,
+        IConnectionAuditService audit)
     {
         _ssh = ssh ?? throw new ArgumentNullException(nameof(ssh));
         _vault = vault ?? throw new ArgumentNullException(nameof(vault));
         _log = log ?? throw new ArgumentNullException(nameof(log));
         _localization = localization ?? throw new ArgumentNullException(nameof(localization));
+        _audit = audit ?? throw new ArgumentNullException(nameof(audit));
 
         _ssh.OutputReceived += OnSshOutput;
         _ssh.StateChanged += OnSshStateChanged;
@@ -59,7 +64,11 @@ public sealed partial class SshSessionCoordinator : ObservableObject, ISshSessio
         bool usePasswordAuth,
         string password,
         SshKeyRecord? selectedKey,
-        string keyPassphrase)
+        string keyPassphrase,
+        Guid? auditServerId = null,
+        SshConnectionProfile? jumpHost = null,
+        SshKeyRecord? jumpHostKey = null,
+        string jumpHostKeyPassphrase = "")
     {
         if (string.IsNullOrWhiteSpace(host) || string.IsNullOrWhiteSpace(username))
         {
@@ -73,14 +82,61 @@ public sealed partial class SshSessionCoordinator : ObservableObject, ISshSessio
             return;
         }
 
+        if (jumpHost is not null && jumpHostKey is null && !usePasswordAuth)
+        {
+            // Jump with password auth on target still needs a bastion key for KEYRA jump.
+        }
+
+        if (jumpHost is not null && jumpHostKey is null)
+        {
+            AppendOutput(L("Connections_ErrJumpKey"), isError: true);
+            return;
+        }
+
         IsBusy = true;
+        _auditServerId = auditServerId;
         _sessionCts?.Cancel();
         _sessionCts?.Dispose();
         _sessionCts = new CancellationTokenSource();
 
         try
         {
-            if (usePasswordAuth)
+            if (jumpHost is not null)
+            {
+                using var jumpMaterial = await _vault.LoadPrivateKeyAsync(jumpHostKey!.Id, _sessionCts.Token)
+                    .ConfigureAwait(true);
+                string? targetPem = null;
+                try
+                {
+                    if (!usePasswordAuth)
+                    {
+                        using var targetMaterial = await _vault
+                            .LoadPrivateKeyAsync(selectedKey!.Id, _sessionCts.Token)
+                            .ConfigureAwait(true);
+                        targetPem = targetMaterial.GetPrivateKeyPem();
+                    }
+
+                    await _ssh.ConnectViaJumpHostAsync(
+                        jumpHost.Host.Trim(),
+                        jumpHost.Port,
+                        jumpHost.Username.Trim(),
+                        jumpMaterial.GetPrivateKeyPem(),
+                        string.IsNullOrWhiteSpace(jumpHostKeyPassphrase) ? null : jumpHostKeyPassphrase,
+                        host.Trim(),
+                        port,
+                        username.Trim(),
+                        usePasswordAuth,
+                        password,
+                        targetPem,
+                        string.IsNullOrWhiteSpace(keyPassphrase) ? null : keyPassphrase,
+                        _sessionCts.Token).ConfigureAwait(true);
+                }
+                finally
+                {
+                    // targetPem cleared by GC; SecureKeyMaterial already disposed.
+                }
+            }
+            else if (usePasswordAuth)
             {
                 await _ssh.ConnectWithPasswordAsync(
                     host.Trim(),
@@ -104,16 +160,49 @@ public sealed partial class SshSessionCoordinator : ObservableObject, ISshSessio
 
             _log.Info($"SSH connected to {host}:{port}.");
             _setStatus(L("Connections_Connected"));
+            await WriteAuditAsync(ConnectionLogStatus.Success, null).ConfigureAwait(true);
+        }
+        catch (OperationCanceledException)
+        {
+            await WriteAuditAsync(ConnectionLogStatus.Timeout, "Connection cancelled or timed out.")
+                .ConfigureAwait(true);
+            _setStatus(L("Connections_Disconnected"));
+            AppendOutput(L("Connections_ErrTimeout"), isError: true);
+        }
+        catch (TimeoutException ex)
+        {
+            _log.Error($"SSH connect timeout: {ex.Message}");
+            _setStatus(L("Connections_Disconnected"));
+            AppendOutput(ex.Message, isError: true);
+            await WriteAuditAsync(ConnectionLogStatus.Timeout, ex.Message).ConfigureAwait(true);
         }
         catch (Exception ex)
         {
             _log.Error($"SSH connect failed: {ex.Message}");
             _setStatus(L("Connections_Disconnected"));
             AppendOutput(ex.Message, isError: true);
+            await WriteAuditAsync(ConnectionLogStatus.Failed, ex.Message).ConfigureAwait(true);
         }
         finally
         {
             IsBusy = false;
+        }
+    }
+
+    private async Task WriteAuditAsync(ConnectionLogStatus status, string? error)
+    {
+        if (_auditServerId is not Guid id)
+        {
+            return;
+        }
+
+        try
+        {
+            await _audit.LogAsync(id, status, error).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            _log.Error($"Failed to write connection audit log: {ex.Message}");
         }
     }
 

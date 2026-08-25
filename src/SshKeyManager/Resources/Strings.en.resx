@@ -93,6 +93,7 @@
   <data name="Generate_Algorithm" xml:space="preserve"><value>Algorithm</value></data>
   <data name="Generate_Algorithm_Ed25519" xml:space="preserve"><value>Ed25519 (recommended)</value></data>
   <data name="Generate_Algorithm_Rsa4096" xml:space="preserve"><value>RSA 4096</value></data>
+  <data name="Generate_Algorithm_EcdsaP384" xml:space="preserve"><value>ECDSA P-384</value></data>
   <data name="Generate_Passphrase" xml:space="preserve"><value>Passphrase (optional)</value></data>
   <data name="Generate_ConfirmPassphrase" xml:space="preserve"><value>Confirm passphrase</value></data>
   <data name="Generate_Button" xml:space="preserve"><value>Generate</value></data>
@@ -168,16 +169,23 @@
   <data name="Connections_ActiveSessionCount" xml:space="preserve"><value>Open sessions: {0}</value></data>
   <data name="Connections_SessionOpened" xml:space="preserve"><value>Opened SSH session: {0}</value></data>
   <data name="Connections_ErrOpenSession" xml:space="preserve"><value>Failed to open SSH session: {0}</value></data>
+  <data name="Connections_JumpHost" xml:space="preserve"><value>Jump host (bastion)</value></data>
+  <data name="Connections_JumpHostNone" xml:space="preserve"><value>(None — direct connection)</value></data>
+  <data name="Connections_JumpHostHint" xml:space="preserve"><value>KEYRA opens direct-tcpip through the bastion (Key A) then authenticates to the target with Key B end-to-end.</value></data>
+  <data name="Connections_ErrJumpKey" xml:space="preserve"><value>Jump host must use a vault SSH key (Key A).</value></data>
+  <data name="Connections_ErrJumpSelf" xml:space="preserve"><value>A profile cannot use itself as jump host.</value></data>
+  <data name="Connections_ErrTimeout" xml:space="preserve"><value>Connection cancelled or timed out.</value></data>
   <data name="Settings_Title" xml:space="preserve"><value>Settings</value></data>
-  <data name="Settings_Info" xml:space="preserve"><value>Private keys are encrypted with AES-256-GCM using a random master key protected by your password (Argon2id). KeyGarageHash verifies vault integrity. Private key material is never written to the operation log.</value></data>
+  <data name="Settings_Info" xml:space="preserve"><value>Private keys are encrypted with AES-256-GCM under a Database Key (DBK). Your master password derives a MEK via Argon2id (envelope encryption). KeyGarageHash plus GCM tags verify integrity. Private key material is never written to the operation log.</value></data>
   <data name="Settings_RootPath" xml:space="preserve"><value>App directory (vault)</value></data>
   <data name="Settings_OpenRoot" xml:space="preserve"><value>Open app directory</value></data>
-  <data name="Settings_VaultPath" xml:space="preserve"><value>Vault folder (keys)</value></data>
+  <data name="Settings_VaultPath" xml:space="preserve"><value>Vault folder (legacy key files)</value></data>
+  <data name="Settings_DatabasePath" xml:space="preserve"><value>SQLite vault database</value></data>
   <data name="Settings_OpenVault" xml:space="preserve"><value>Open vault folder</value></data>
   <data name="Settings_SshPath" xml:space="preserve"><value>Default ~/.ssh directory</value></data>
   <data name="Settings_Language" xml:space="preserve"><value>Language</value></data>
   <data name="Settings_ChangePassword" xml:space="preserve"><value>Change vault password</value></data>
-  <data name="Settings_ChangePasswordHint" xml:space="preserve"><value>Re-encrypts the master key with a new password and refreshes KeyGarageHash.</value></data>
+  <data name="Settings_ChangePasswordHint" xml:space="preserve"><value>Re-encrypts the Database Key (DBK) with a new MEK derived from your password and refreshes KeyGarageHash.</value></data>
   <data name="Settings_CurrentPassword" xml:space="preserve"><value>Current password</value></data>
   <data name="Settings_NewPassword" xml:space="preserve"><value>New password</value></data>
   <data name="Settings_ConfirmPassword" xml:space="preserve"><value>Confirm new password</value></data>
@@ -185,11 +193,31 @@
   <data name="Settings_Security" xml:space="preserve"><value>Security</value></data>
   <data name="Settings_SecurityHint" xml:space="preserve"><value>The vault protects keys from other system users, not from malware in your session. Prefer Ed25519. Clear the clipboard after copying a private key.</value></data>
   <data name="Settings_PasswordMismatch" xml:space="preserve"><value>New passwords do not match.</value></data>
-  <data name="Settings_PasswordChanged" xml:space="preserve"><value>Password changed. Master key re-encrypted.</value></data>
+  <data name="Settings_PasswordChanged" xml:space="preserve"><value>Password changed. Database key re-encrypted.</value></data>
   <data name="Settings_WrongPassword" xml:space="preserve"><value>Current password is incorrect.</value></data>
+  <data name="Hardware_Title" xml:space="preserve"><value>Hardware security keys</value></data>
+  <data name="Hardware_Pair" xml:space="preserve"><value>Pair new hardware key</value></data>
+  <data name="Hardware_Refresh" xml:space="preserve"><value>Refresh</value></data>
+  <data name="Hardware_TestTouch" xml:space="preserve"><value>Test</value></data>
+  <data name="Hardware_Delete" xml:space="preserve"><value>Delete</value></data>
+  <data name="Hardware_Loaded" xml:space="preserve"><value>Registered hardware keys: {0}</value></data>
+  <data name="Hardware_ErrName" xml:space="preserve"><value>Enter a display name for the hardware key.</value></data>
+  <data name="Hardware_TouchPrompt" xml:space="preserve"><value>Touch your YubiKey / FIDO2 key when it blinks…</value></data>
+  <data name="Hardware_Paired" xml:space="preserve"><value>Paired hardware key '{0}'.</value></data>
+  <data name="Hardware_TestOk" xml:space="preserve"><value>Hardware key material is readable from the vault.</value></data>
+  <data name="Hardware_TestFail" xml:space="preserve"><value>Hardware key test failed.</value></data>
+  <data name="Hardware_ConfirmDelete" xml:space="preserve"><value>Remove hardware key '{0}' from the vault?</value></data>
+  <data name="Hardware_AgentTitle" xml:space="preserve"><value>SSH agent</value></data>
+  <data name="Hardware_StartAgent" xml:space="preserve"><value>Start KEYRA agent</value></data>
+  <data name="Hardware_StopAgent" xml:space="preserve"><value>Stop KEYRA agent</value></data>
+  <data name="Hardware_ListSystemAgent" xml:space="preserve"><value>List system agent keys</value></data>
+  <data name="Hardware_AgentStarted" xml:space="preserve"><value>KEYRA agent listening on \\.\pipe\{0}</value></data>
+  <data name="Hardware_AgentStopped" xml:space="preserve"><value>KEYRA agent stopped.</value></data>
+  <data name="Hardware_SystemAgentMissing" xml:space="preserve"><value>Windows OpenSSH agent is not available.</value></data>
+  <data name="Hardware_SystemAgentCount" xml:space="preserve"><value>System agent identities: {0}</value></data>
   <data name="Login_WindowTitle" xml:space="preserve"><value>KEYRA — unlock vault</value></data>
   <data name="Login_Title" xml:space="preserve"><value>Unlock vault</value></data>
-  <data name="Login_Subtitle" xml:space="preserve"><value>Enter your vault account to decrypt the master key.</value></data>
+  <data name="Login_Subtitle" xml:space="preserve"><value>Enter your vault account to unlock the encrypted database.</value></data>
   <data name="Login_Username" xml:space="preserve"><value>Username</value></data>
   <data name="Login_Password" xml:space="preserve"><value>Password</value></data>
   <data name="Login_Exit" xml:space="preserve"><value>Exit</value></data>
@@ -232,6 +260,8 @@
   <data name="Reveal_HidingIn" xml:space="preserve"><value>Hiding in {0}s</value></data>
   <data name="Algorithm_Ed25519" xml:space="preserve"><value>Ed25519</value></data>
   <data name="Algorithm_Rsa4096" xml:space="preserve"><value>RSA 4096</value></data>
+  <data name="Algorithm_EcdsaP384" xml:space="preserve"><value>ECDSA P-384</value></data>
+  <data name="Algorithm_SkEd25519" xml:space="preserve"><value>FIDO2 sk-ed25519</value></data>
   <data name="Connections_OutputError" xml:space="preserve"><value>[ERR] {0}</value></data>
   <data name="Connections_Completing" xml:space="preserve"><value>Completing…</value></data>
   <data name="Connections_CompletionFailed" xml:space="preserve"><value>Tab completion failed: {0}</value></data>

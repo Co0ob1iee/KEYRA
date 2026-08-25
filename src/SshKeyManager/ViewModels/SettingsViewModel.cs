@@ -23,7 +23,8 @@ public partial class SettingsViewModel : LocalizedViewModelBase
         IAppLogService log,
         IVaultSecurityService security,
         ILocalizationService localization,
-        IAppSettingsService settingsService)
+        IAppSettingsService settingsService,
+        HardwareKeysViewModel hardware)
         : base(localization)
     {
         _vault = vault ?? throw new ArgumentNullException(nameof(vault));
@@ -31,6 +32,7 @@ public partial class SettingsViewModel : LocalizedViewModelBase
         _log = log ?? throw new ArgumentNullException(nameof(log));
         _security = security ?? throw new ArgumentNullException(nameof(security));
         _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
+        Hardware = hardware ?? throw new ArgumentNullException(nameof(hardware));
 
         LanguageOptions = LanguageOption.All;
         _suppressLanguageChange = true;
@@ -42,10 +44,27 @@ public partial class SettingsViewModel : LocalizedViewModelBase
         RefreshPaths();
     }
 
+    public HardwareKeysViewModel Hardware { get; }
+
     public void ConfigureShell(Action<string> setStatus, Action onCultureChanged)
     {
         _setStatus = setStatus ?? throw new ArgumentNullException(nameof(setStatus));
         _onCultureChanged = onCultureChanged ?? throw new ArgumentNullException(nameof(onCultureChanged));
+        Hardware.ConfigureShell(setStatus);
+        _ = Hardware.InitializeAsync();
+    }
+
+    public string DatabasePathLabel => L("Settings_DatabasePath");
+
+    [ObservableProperty]
+    private string _databasePath = string.Empty;
+
+    public void RefreshPaths()
+    {
+        VaultPath = _vault.VaultDirectory;
+        RootPath = _vault.RootDirectory;
+        DatabasePath = _security.DatabasePath;
+        SshPath = _export.GetDefaultSshDirectory();
     }
 
     public IReadOnlyList<LanguageOption> LanguageOptions { get; }
@@ -109,13 +128,6 @@ public partial class SettingsViewModel : LocalizedViewModelBase
     [ObservableProperty]
     private bool _isChangingPassword;
 
-    public void RefreshPaths()
-    {
-        VaultPath = _vault.VaultDirectory;
-        RootPath = _vault.RootDirectory;
-        SshPath = _export.GetDefaultSshDirectory();
-    }
-
     partial void OnSelectedLanguageChanged(LanguageOption value)
     {
         if (_suppressLanguageChange || value is null)
@@ -159,6 +171,7 @@ public partial class SettingsViewModel : LocalizedViewModelBase
         OnPropertyChanged(nameof(ChangeButtonLabel));
         OnPropertyChanged(nameof(SecurityTitle));
         OnPropertyChanged(nameof(SecurityHint));
+        OnPropertyChanged(nameof(DatabasePathLabel));
     }
 
     [RelayCommand]

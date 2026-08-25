@@ -25,6 +25,8 @@ public partial class KeyListItemViewModel : ObservableObject
     {
         SshKeyAlgorithm.Ed25519 => _localization.GetString("Algorithm_Ed25519"),
         SshKeyAlgorithm.Rsa4096 => _localization.GetString("Algorithm_Rsa4096"),
+        SshKeyAlgorithm.EcdsaP384 => _localization.GetString("Algorithm_EcdsaP384"),
+        SshKeyAlgorithm.SkEd25519 => _localization.GetString("Algorithm_SkEd25519"),
         _ => _record.Algorithm.ToString()
     };
 

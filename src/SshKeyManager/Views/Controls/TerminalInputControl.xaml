@@ -26,7 +26,7 @@
 
             <TextBlock Grid.Column="0"
                        Text="›"
-                       FontFamily="Cascadia Mono, Consolas"
+                       FontFamily="{StaticResource MonoFontFamily}"
                        FontSize="14"
                        FontWeight="SemiBold"
                        Foreground="{StaticResource AccentBrush}"
@@ -38,7 +38,7 @@
                 <TextBlock x:Name="GhostOverlay"
                            VerticalAlignment="Center"
                            HorizontalAlignment="Left"
-                           FontFamily="Cascadia Mono, Consolas"
+                           FontFamily="{StaticResource MonoFontFamily}"
                            FontSize="13"
                            Margin="0,6"
                            IsHitTestVisible="False"
@@ -54,7 +54,7 @@
                          MinHeight="28"
                          Background="Transparent"
                          BorderThickness="0"
-                         FontFamily="Cascadia Mono, Consolas"
+                         FontFamily="{StaticResource MonoFontFamily}"
                          FontSize="13"
                          Padding="0,6"
                          Foreground="{StaticResource TextPrimaryBrush}"
@@ -129,7 +129,7 @@
                             <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
                             <Setter Property="Background" Value="Transparent" />
                             <Setter Property="Padding" Value="10,6" />
-                            <Setter Property="FontFamily" Value="Consolas" />
+                            <Setter Property="FontFamily" Value="{StaticResource MonoFontFamily}" />
                             <Setter Property="FontSize" Value="12" />
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                             <Setter Property="Template">

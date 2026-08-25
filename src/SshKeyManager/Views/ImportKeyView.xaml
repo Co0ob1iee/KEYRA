@@ -28,7 +28,7 @@
                                  AcceptsReturn="True"
                                  TextWrapping="Wrap"
                                  Height="180"
-                                 FontFamily="Consolas"
+                                 FontFamily="{StaticResource MonoFontFamily}"
                                  FontSize="{StaticResource FontSizeBody}"
                                  VerticalScrollBarVisibility="Auto"
                                  Margin="{StaticResource MarginFieldBottom}" />
@@ -60,7 +60,7 @@
                         <TextBlock Text="{Binding FingerprintLabel}" Style="{StaticResource LabelTextStyle}" />
                         <TextBox Text="{Binding PreviewFingerprint, Mode=OneWay}"
                                  IsReadOnly="True"
-                                 FontFamily="Consolas"
+                                 FontFamily="{StaticResource MonoFontFamily}"
                                  Margin="{StaticResource MarginFieldBottom}" />
 
                         <TextBlock Text="{Binding PublicKeyLabel}" Style="{StaticResource LabelTextStyle}" />
@@ -68,7 +68,7 @@
                                  IsReadOnly="True"
                                  TextWrapping="Wrap"
                                  Height="90"
-                                 FontFamily="Consolas"
+                                 FontFamily="{StaticResource MonoFontFamily}"
                                  FontSize="{StaticResource FontSizeMono}" />
                     </StackPanel>
                 </Border>

@@ -7,14 +7,52 @@
         <ResourceDictionary Source="Spacing.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
+    <FontFamily x:Key="UiFontFamily">pack://application:,,,/Assets/Fonts/#Inter</FontFamily>
+    <FontFamily x:Key="MonoFontFamily">pack://application:,,,/Assets/Fonts/#JetBrains Mono</FontFamily>
+
     <sys:Double x:Key="FontSizeCaption">12</sys:Double>
     <sys:Double x:Key="FontSizeBody">14</sys:Double>
     <sys:Double x:Key="FontSizeSection">16</sys:Double>
     <sys:Double x:Key="FontSizeTitle">22</sys:Double>
-    <sys:Double x:Key="FontSizeMono">11</sys:Double>
+    <sys:Double x:Key="FontSizeMono">12</sys:Double>
     <sys:Double x:Key="LineHeightBody">20</sys:Double>
 
+    <Style TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
+    </Style>
+
+    <Style TargetType="TextBox">
+        <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
+    </Style>
+
+    <Style TargetType="Button">
+        <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
+    </Style>
+
+    <Style TargetType="ComboBox">
+        <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
+    </Style>
+
+    <Style TargetType="CheckBox">
+        <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
+    </Style>
+
+    <Style TargetType="PasswordBox">
+        <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
+    </Style>
+
+    <Style TargetType="ListBox">
+        <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
+    </Style>
+
+    <Style x:Key="MonoTextStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource MonoFontFamily}" />
+        <Setter Property="FontSize" Value="{StaticResource FontSizeMono}" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+    </Style>
+
     <Style x:Key="SectionTitleStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
         <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
         <Setter Property="FontSize" Value="{StaticResource FontSizeTitle}" />
         <Setter Property="FontWeight" Value="SemiBold" />
@@ -22,6 +60,7 @@
     </Style>
 
     <Style x:Key="SubsectionTitleStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
         <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
         <Setter Property="FontSize" Value="{StaticResource FontSizeSection}" />
         <Setter Property="FontWeight" Value="SemiBold" />
@@ -29,6 +68,7 @@
     </Style>
 
     <Style x:Key="BodyTextStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
         <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
         <Setter Property="FontSize" Value="{StaticResource FontSizeBody}" />
         <Setter Property="TextWrapping" Value="Wrap" />
@@ -36,16 +76,33 @@
     </Style>
 
     <Style x:Key="MutedTextStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
         <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
         <Setter Property="FontSize" Value="{StaticResource FontSizeCaption}" />
         <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
 
     <Style x:Key="LabelTextStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
         <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
         <Setter Property="FontSize" Value="{StaticResource FontSizeCaption}" />
         <Setter Property="FontWeight" Value="Medium" />
         <Setter Property="Margin" Value="{StaticResource MarginLabelBottom}" />
+    </Style>
+
+    <!-- KEY / RA wordmark -->
+    <Style x:Key="BrandKeyStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+    </Style>
+
+    <Style x:Key="BrandRaStyle" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource UiFontFamily}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}" />
     </Style>
 
 </ResourceDictionary>

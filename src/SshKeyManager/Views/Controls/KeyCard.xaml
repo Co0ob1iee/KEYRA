@@ -64,7 +64,7 @@
                     </DockPanel>
                     <TextBlock Text="{Binding Fingerprint}"
                                Style="{StaticResource MutedTextStyle}"
-                               FontFamily="Consolas"
+                               FontFamily="{StaticResource MonoFontFamily}"
                                FontSize="{StaticResource FontSizeMono}"
                                Margin="{StaticResource MarginSubsectionBottom}"
                                TextWrapping="Wrap" />

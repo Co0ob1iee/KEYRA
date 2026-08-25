@@ -1,5 +1,4 @@
-using System.Security.Cryptography;
-using System.Text;
+using Org.BouncyCastle.Asn1.Sec;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Generators;
 using Org.BouncyCastle.Crypto.Parameters;
@@ -8,6 +7,8 @@ using Org.BouncyCastle.Math;
 using Org.BouncyCastle.Security;
 using SshKeyManager.Models;
 using SshKeyManager.Services.OpenSsh;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace SshKeyManager.Services;
 
@@ -287,6 +288,9 @@ public sealed class OpenSshKeyFactory : IOpenSshKeyFactory
         {
             SshKeyAlgorithm.Ed25519 => CreateEd25519(),
             SshKeyAlgorithm.Rsa4096 => CreateRsa4096(),
+            SshKeyAlgorithm.EcdsaP384 => CreateEcdsaP384(),
+            SshKeyAlgorithm.SkEd25519 => throw new NotSupportedException(
+                "sk-ed25519 keys are created via Hardware Security Keys pairing (FIDO2), not Generate."),
             _ => throw new ArgumentOutOfRangeException(nameof(algorithm), algorithm, "Unsupported algorithm.")
         };
     }
@@ -305,12 +309,22 @@ public sealed class OpenSshKeyFactory : IOpenSshKeyFactory
         return generator.GenerateKeyPair();
     }
 
+    private static AsymmetricCipherKeyPair CreateEcdsaP384()
+    {
+        var curve = SecNamedCurves.GetByOid(SecObjectIdentifiers.SecP384r1);
+        var domain = new ECDomainParameters(curve.Curve, curve.G, curve.N, curve.H, curve.GetSeed());
+        var generator = new ECKeyPairGenerator();
+        generator.Init(new ECKeyGenerationParameters(domain, new SecureRandom()));
+        return generator.GenerateKeyPair();
+    }
+
     private static AsymmetricKeyParameter DerivePublicKey(AsymmetricKeyParameter privateKey)
     {
         return privateKey switch
         {
             Ed25519PrivateKeyParameters ed => ed.GeneratePublicKey(),
             RsaPrivateCrtKeyParameters rsa => new RsaKeyParameters(false, rsa.Modulus, rsa.PublicExponent),
+            ECPrivateKeyParameters ec => new ECPublicKeyParameters(ec.Parameters.G.Multiply(ec.D).Normalize(), ec.Parameters),
             _ => throw new NotSupportedException($"Unsupported private key type: {privateKey.GetType().Name}")
         };
     }
@@ -321,8 +335,15 @@ public sealed class OpenSshKeyFactory : IOpenSshKeyFactory
         {
             Ed25519PrivateKeyParameters => SshKeyAlgorithm.Ed25519,
             RsaKeyParameters => SshKeyAlgorithm.Rsa4096,
+            ECPrivateKeyParameters ec when IsP384(ec) => SshKeyAlgorithm.EcdsaP384,
             _ => throw new NotSupportedException($"Unsupported key type: {privateKey.GetType().Name}")
         };
+    }
+
+    private static bool IsP384(ECPrivateKeyParameters key)
+    {
+        var p384 = SecNamedCurves.GetByOid(SecObjectIdentifiers.SecP384r1);
+        return key.Parameters.N.Equals(p384.N);
     }
 
     private static string FormatPublicKey(AsymmetricKeyParameter publicKey, string comment)
@@ -332,6 +353,7 @@ public sealed class OpenSshKeyFactory : IOpenSshKeyFactory
         {
             Ed25519PublicKeyParameters => "ssh-ed25519",
             RsaKeyParameters => "ssh-rsa",
+            ECPublicKeyParameters => "ecdsa-sha2-nistp384",
             _ => throw new NotSupportedException($"Unsupported public key type: {publicKey.GetType().Name}")
         };
 

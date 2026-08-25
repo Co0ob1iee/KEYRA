@@ -37,7 +37,8 @@ public partial class GenerateKeyViewModel : LocalizedViewModelBase
     public IReadOnlyList<SshKeyAlgorithm> Algorithms { get; } =
     [
         SshKeyAlgorithm.Ed25519,
-        SshKeyAlgorithm.Rsa4096
+        SshKeyAlgorithm.Rsa4096,
+        SshKeyAlgorithm.EcdsaP384
     ];
 
     public string Title => L("Generate_Title");
@@ -63,6 +64,8 @@ public partial class GenerateKeyViewModel : LocalizedViewModelBase
     public string Ed25519Label => L("Generate_Algorithm_Ed25519");
 
     public string Rsa4096Label => L("Generate_Algorithm_Rsa4096");
+
+    public string EcdsaP384Label => L("Generate_Algorithm_EcdsaP384");
 
     [ObservableProperty]
     private string _name = string.Empty;
@@ -106,6 +109,7 @@ public partial class GenerateKeyViewModel : LocalizedViewModelBase
         OnPropertyChanged(nameof(PublicKeyLabel));
         OnPropertyChanged(nameof(Ed25519Label));
         OnPropertyChanged(nameof(Rsa4096Label));
+        OnPropertyChanged(nameof(EcdsaP384Label));
     }
 
     [RelayCommand]

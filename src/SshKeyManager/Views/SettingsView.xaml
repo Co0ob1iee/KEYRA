@@ -29,6 +29,12 @@
                             Margin="{StaticResource MarginFormCard}"
                             Command="{Binding OpenRootFolderCommand}" />
 
+                    <TextBlock Text="{Binding DatabasePathLabel}" Style="{StaticResource LabelTextStyle}" />
+                    <TextBox Text="{Binding DatabasePath, Mode=OneWay}"
+                             IsReadOnly="True"
+                             FontFamily="{StaticResource MonoFontFamily}"
+                             Margin="{StaticResource MarginFormCard}" />
+
                     <TextBlock Text="{Binding VaultPathLabel}" Style="{StaticResource LabelTextStyle}" />
                     <TextBox Text="{Binding VaultPath, Mode=OneWay}"
                              IsReadOnly="True"
@@ -78,6 +84,67 @@
                             Style="{StaticResource PrimaryButtonStyle}"
                             HorizontalAlignment="Left"
                             Command="{Binding ChangePasswordCommand}" />
+                </StackPanel>
+            </Border>
+
+            <TextBlock Text="{Binding Hardware.Title}"
+                       Style="{StaticResource SubsectionTitleStyle}"
+                       Margin="{StaticResource MarginSubsectionBottom}" />
+            <Border Style="{StaticResource FormCardStyle}">
+                <StackPanel DataContext="{Binding Hardware}">
+                    <TextBlock Text="{Binding AvailabilityText}"
+                               Style="{StaticResource MutedTextStyle}"
+                               Margin="{StaticResource MarginFieldBottom}"
+                               TextWrapping="Wrap" />
+                    <DockPanel Margin="{StaticResource MarginFieldBottom}">
+                        <Button Content="{Binding PairButtonLabel}"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Command="{Binding PairCommand}"
+                                DockPanel.Dock="Right"
+                                Margin="8,0,0,0" />
+                        <TextBox Text="{Binding PairName, UpdateSourceTrigger=PropertyChanged}" />
+                    </DockPanel>
+                    <StackPanel Orientation="Horizontal" Margin="{StaticResource MarginFieldBottom}">
+                        <Button Content="{Binding RefreshLabel}"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Command="{Binding RefreshCommand}"
+                                Margin="0,0,8,0" />
+                        <Button Content="{Binding TestTouchLabel}"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Command="{Binding TestTouchCommand}"
+                                Margin="0,0,8,0" />
+                        <Button Content="{Binding DeleteLabel}"
+                                Style="{StaticResource DangerButtonStyle}"
+                                Command="{Binding DeleteCommand}" />
+                    </StackPanel>
+                    <ListBox ItemsSource="{Binding Keys}"
+                             SelectedItem="{Binding SelectedKey}"
+                             DisplayMemberPath="DisplayName"
+                             Height="120"
+                             Margin="{StaticResource MarginFieldBottom}" />
+                    <TextBlock Text="{Binding StatusMessage}"
+                               Style="{StaticResource MutedTextStyle}"
+                               Margin="{StaticResource MarginFieldBottom}" />
+
+                    <TextBlock Text="{Binding AgentSectionTitle}"
+                               Style="{StaticResource LabelTextStyle}"
+                               Margin="0,8,0,6" />
+                    <StackPanel Orientation="Horizontal" Margin="{StaticResource MarginFieldBottom}">
+                        <Button Content="{Binding StartAgentLabel}"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Command="{Binding StartAgentCommand}"
+                                Margin="0,0,8,0" />
+                        <Button Content="{Binding StopAgentLabel}"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Command="{Binding StopAgentCommand}"
+                                Margin="0,0,8,0" />
+                        <Button Content="{Binding ListSystemAgentLabel}"
+                                Style="{StaticResource SecondaryButtonStyle}"
+                                Command="{Binding ListSystemAgentCommand}" />
+                    </StackPanel>
+                    <ListBox ItemsSource="{Binding AgentIdentities}"
+                             DisplayMemberPath="Comment"
+                             Height="80" />
                 </StackPanel>
             </Border>
 

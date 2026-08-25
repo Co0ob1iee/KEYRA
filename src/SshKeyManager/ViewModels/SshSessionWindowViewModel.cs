@@ -122,7 +122,11 @@ public partial class SshSessionWindowViewModel : LocalizedViewModelBase, ITermin
             _request.UsePasswordAuth,
             _request.Password,
             _request.SelectedKey,
-            _request.KeyPassphrase).ConfigureAwait(true);
+            _request.KeyPassphrase,
+            _request.ProfileId,
+            _request.JumpHost,
+            _request.JumpHostKey,
+            _request.JumpHostKeyPassphrase).ConfigureAwait(true);
 
         SessionStateChanged?.Invoke(this, EventArgs.Empty);
         NotifySessionBindings();

@@ -12,13 +12,15 @@
 
 ## Features
 
-- **Encrypted vault** — Argon2id + AES-256-GCM + KeyGarageHash integrity check
-- **Key management** — Ed25519 / RSA generate & import (OpenSSH formats)
-- **Connection profiles** — host, user, port, key or password auth (passwords **not** persisted)
+- **Encrypted SQLite vault** — Argon2id MEK → envelope DBK → AES-256-GCM + KeyGarageHash
+- **Key management** — Ed25519 / RSA / ECDSA P-384 generate & import; FIDO2 sk-ed25519 pairing when OpenSSH is available
+- **Servers & audit** — profiles in SQLite with connection SUCCESS/FAILED/TIMEOUT logs
+- **JumpHost** — bastion direct-tcpip (Key A) then end-to-end target auth (Key B)
+- **SSH agent** — Windows OpenSSH agent client + optional KEYRA agent pipe while unlocked
 - **Multi-session SSH** — separate windows per session
-- **ANSI terminal** — color-aware terminal UI
+- **ANSI terminal** — JetBrains Mono, color-aware terminal UI
 - **i18n** — 6 languages (EN, PL locales via resources + DE / FR / ZH / RU locale packs)
-- **KEYRA branding** — dark desktop UI with custom icon/logo
+- **KEYRA branding** — Inter UI font, KEY/RA wordmark, Cyber Emerald palette
 
 ## Screenshots
 

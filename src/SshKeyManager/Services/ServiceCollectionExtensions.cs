@@ -1,5 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using SshKeyManager.Presentation;
+using SshKeyManager.Services.Agent;
+using SshKeyManager.Services.Data;
+using SshKeyManager.Services.Hardware;
 using SshKeyManager.Services.Security;
 using SshKeyManager.Services.Ssh;
 using SshKeyManager.ViewModels;
@@ -11,6 +14,8 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddSshKeyManagerServices(this IServiceCollection services)
     {
         services.AddSingleton<VaultPaths>();
+        services.AddSingleton<KeyraDb>();
+        services.AddSingleton<KeyraRepository>();
         services.AddSingleton<ILocalizationService, LocalizationService>();
         services.AddSingleton<IAppSettingsService, AppSettingsService>();
         services.AddSingleton<IShellLayoutService, ShellLayoutService>();
@@ -27,10 +32,14 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IKeyExportService, KeyExportService>();
         services.AddSingleton<IClipboardService, ClipboardService>();
         services.AddSingleton<IAppLogService, AppLogService>();
+        services.AddSingleton<IConnectionAuditService, ConnectionAuditService>();
         services.AddSingleton<ISshConnectionProfileStore, SshConnectionProfileStore>();
         services.AddSingleton<ISshSessionFactory, SshSessionFactory>();
         services.AddSingleton<ISshSessionWindowService, SshSessionWindowService>();
-
+        services.AddSingleton<ISshAgentClient, WindowsOpenSshAgentClient>();
+        services.AddSingleton<IKeyraAgentProvider, KeyraAgentProvider>();
+        services.AddSingleton<IHardwareKeyService, HardwareKeyService>();
+        services.AddSingleton<HardwareKeysViewModel>();
         services.AddTransient<SetupViewModel>();
         services.AddTransient<LoginViewModel>();
 

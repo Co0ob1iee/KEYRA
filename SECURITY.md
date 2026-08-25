@@ -4,6 +4,7 @@
 
 | Version | Supported |
 | ------- | --------- |
+| 1.1.x   | Yes       |
 | 1.0.x   | Yes       |
 
 ## Reporting a vulnerability
@@ -30,11 +31,12 @@ KEYRA stores sensitive data under Local Application Data. **Never** add these to
 
 | Path (under `%LocalAppData%\SshKeyManager\`) | Content |
 | -------------------------------------------- | ------- |
-| `master.key.enc` | Encrypted master key |
-| `KeyGarageHash` | Vault integrity hash |
-| `vault\*.key.enc` | Encrypted private keys |
-| `vault\index.json` | Key index |
-| `connections.json` | SSH connection profiles |
+| `keyra.db` | SQLite vault (encrypted private keys + metadata) |
+| `KeyGarageHash` | Vault integrity HMAC (alongside DB) |
+| `master.key.enc` | Legacy encrypted master key (pre-1.1; migrated on unlock) |
+| `vault\*.key.enc` | Legacy encrypted private keys |
+| `vault\index.json` | Legacy key index |
+| `connections.json` | Legacy SSH connection profiles |
 
 Also never commit:
 
@@ -46,8 +48,10 @@ The repository `.gitignore` already excludes these patterns. If you accidentally
 
 ## Security model (summary)
 
-- Master password → **Argon2id** → wraps a random master key
-- Private keys at rest → **AES-256-GCM**
-- Vault integrity → **KeyGarageHash**
+- Master password → **Argon2id** → **MEK** (never stored)
+- Random **DBK** wrapped by MEK (**AES-256-GCM** envelope) in `vault_metadata`
+- Private keys / sensitive fields at rest → **AES-256-GCM(DBK)** in SQLite
+- Vault integrity → GCM auth tags + **KeyGarageHash** / metadata HMAC
+- Sensitive buffers → memzero + **VirtualLock** where possible
 - SSH passwords entered for a session are **not** stored in connection profiles
 - Vault lives only on the local machine (`%LocalAppData%\SshKeyManager`)

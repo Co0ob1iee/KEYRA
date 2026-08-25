@@ -36,7 +36,7 @@
                  ItemsSource="{Binding FilteredEntries}"
                  Style="{StaticResource TransparentListBoxStyle}"
                  Margin="8,0,8,8"
-                 FontFamily="Consolas"
+                 FontFamily="{StaticResource MonoFontFamily}"
                  FontSize="{StaticResource FontSizeCaption}"
                  ScrollViewer.ScrollChanged="LogList_ScrollChanged">
             <ListBox.ItemTemplate>

@@ -1,20 +1,15 @@
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
 using SshKeyManager.Models;
+using SshKeyManager.Services.Data;
 using SshKeyManager.Services.Security;
 
 namespace SshKeyManager.Services;
 
 public sealed class VaultStore : IVaultStore
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
-
     private readonly VaultPaths _paths;
+    private readonly KeyraRepository _repo;
     private readonly IVaultSession _session;
     private readonly AesGcmVaultCrypto _crypto;
     private readonly KeyGarageHashService _keyGarage;
@@ -22,11 +17,13 @@ public sealed class VaultStore : IVaultStore
 
     public VaultStore(
         VaultPaths paths,
+        KeyraRepository repo,
         IVaultSession session,
         AesGcmVaultCrypto crypto,
         KeyGarageHashService keyGarage)
     {
         _paths = paths ?? throw new ArgumentNullException(nameof(paths));
+        _repo = repo ?? throw new ArgumentNullException(nameof(repo));
         _session = session ?? throw new ArgumentNullException(nameof(session));
         _crypto = crypto ?? throw new ArgumentNullException(nameof(crypto));
         _keyGarage = keyGarage ?? throw new ArgumentNullException(nameof(keyGarage));
@@ -42,9 +39,8 @@ public sealed class VaultStore : IVaultStore
         await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            EnsureVault();
-            var index = await ReadIndexUnlockedAsync(cancellationToken).ConfigureAwait(false);
-            return index.Keys
+            return _repo.ListKeys()
+                .Select(VaultSecurityService.MapKey)
                 .OrderByDescending(k => k.CreatedUtc)
                 .ToList();
         }
@@ -60,9 +56,8 @@ public sealed class VaultStore : IVaultStore
         await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            EnsureVault();
-            var index = await ReadIndexUnlockedAsync(cancellationToken).ConfigureAwait(false);
-            return index.Keys.FirstOrDefault(k => k.Id == id);
+            var row = _repo.GetKey(id.ToString("N"));
+            return row is null ? null : VaultSecurityService.MapKey(row);
         }
         finally
         {
@@ -90,9 +85,6 @@ public sealed class VaultStore : IVaultStore
         await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            EnsureVault();
-            var index = await ReadIndexUnlockedAsync(cancellationToken).ConfigureAwait(false);
-
             if (metadata.Id == Guid.Empty)
             {
                 metadata.Id = Guid.NewGuid();
@@ -104,42 +96,36 @@ public sealed class VaultStore : IVaultStore
             }
 
             var plain = Encoding.UTF8.GetBytes(privateKeyPem);
-            byte[] encrypted;
+            AesGcmParts parts;
             try
             {
-                encrypted = _crypto.Encrypt(_session.MasterKey, plain);
+                parts = _crypto.EncryptParts(_session.DatabaseKey, plain);
             }
             finally
             {
-                CryptoUtilities.CryptographicClear(plain);
+                SecureMemory.Memzero(plain);
             }
 
-            var keyPath = _paths.GetEncryptedKeyPath(metadata.Id);
-            await using (var fs = new FileStream(
-                             keyPath,
-                             FileMode.Create,
-                             FileAccess.Write,
-                             FileShare.None,
-                             4096,
-                             FileOptions.Asynchronous | FileOptions.SequentialScan))
+            var now = DateTime.UtcNow.ToString("O");
+            _repo.UpsertKey(new SshKeyRow
             {
-                await fs.WriteAsync(encrypted, cancellationToken).ConfigureAwait(false);
-                await fs.FlushAsync(cancellationToken).ConfigureAwait(false);
-            }
+                Id = metadata.Id.ToString("N"),
+                Name = metadata.Name,
+                KeyType = KeyraRepository.ToKeyType(metadata.Algorithm),
+                PublicKey = metadata.PublicKey,
+                FingerprintSha256 = metadata.Fingerprint,
+                EncPrivateKey = parts.Ciphertext,
+                PrivateKeyNonce = parts.Nonce,
+                PrivateKeyTag = parts.Tag,
+                Comment = metadata.Comment,
+                CreatedAt = metadata.CreatedUtc.ToUniversalTime().ToString("O"),
+                UpdatedAt = now
+            });
 
-            var existing = index.Keys.FindIndex(k => k.Id == metadata.Id);
-            if (existing >= 0)
-            {
-                index.Keys[existing] = CloneRecord(metadata);
-            }
-            else
-            {
-                index.Keys.Add(CloneRecord(metadata));
-            }
-
-            await WriteIndexUnlockedAsync(index, cancellationToken).ConfigureAwait(false);
-            await _keyGarage.WriteAsync(_session.MasterKey, _session.Username, index.Keys, cancellationToken)
+            var keys = _repo.ListKeys().Select(VaultSecurityService.MapKey).ToList();
+            await _keyGarage.WriteAsync(_session.DatabaseKey, _session.Username, keys, cancellationToken)
                 .ConfigureAwait(false);
+            RefreshIntegrityHmac(keys);
             return CloneRecord(metadata);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
@@ -158,21 +144,14 @@ public sealed class VaultStore : IVaultStore
         await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            EnsureVault();
-            var index = await ReadIndexUnlockedAsync(cancellationToken).ConfigureAwait(false);
-            if (index.Keys.All(k => k.Id != id))
-            {
-                throw new FileNotFoundException("Key metadata was not found in the vault index.", id.ToString());
-            }
+            var row = _repo.GetKey(id.ToString("N"))
+                ?? throw new FileNotFoundException("Key metadata was not found in the vault.", id.ToString());
 
-            var keyPath = _paths.GetEncryptedKeyPath(id);
-            if (!File.Exists(keyPath))
-            {
-                throw new FileNotFoundException("Encrypted private key file is missing.", keyPath);
-            }
-
-            var encrypted = await File.ReadAllBytesAsync(keyPath, cancellationToken).ConfigureAwait(false);
-            var plain = _crypto.Decrypt(_session.MasterKey, encrypted);
+            var plain = _crypto.DecryptParts(
+                _session.DatabaseKey,
+                row.EncPrivateKey,
+                row.PrivateKeyNonce,
+                row.PrivateKeyTag);
             try
             {
                 var pem = Encoding.UTF8.GetString(plain);
@@ -180,7 +159,7 @@ public sealed class VaultStore : IVaultStore
             }
             finally
             {
-                CryptoUtilities.CryptographicClear(plain);
+                SecureMemory.Memzero(plain);
             }
         }
         catch (Exception ex) when (ex is not OperationCanceledException and not FileNotFoundException and not CryptographicException)
@@ -199,19 +178,11 @@ public sealed class VaultStore : IVaultStore
         await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            EnsureVault();
-            var index = await ReadIndexUnlockedAsync(cancellationToken).ConfigureAwait(false);
-            index.Keys.RemoveAll(k => k.Id == id);
-            await WriteIndexUnlockedAsync(index, cancellationToken).ConfigureAwait(false);
-
-            var keyPath = _paths.GetEncryptedKeyPath(id);
-            if (File.Exists(keyPath))
-            {
-                File.Delete(keyPath);
-            }
-
-            await _keyGarage.WriteAsync(_session.MasterKey, _session.Username, index.Keys, cancellationToken)
+            _repo.DeleteKey(id.ToString("N"));
+            var keys = _repo.ListKeys().Select(VaultSecurityService.MapKey).ToList();
+            await _keyGarage.WriteAsync(_session.DatabaseKey, _session.Username, keys, cancellationToken)
                 .ConfigureAwait(false);
+            RefreshIntegrityHmac(keys);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
@@ -223,43 +194,23 @@ public sealed class VaultStore : IVaultStore
         }
     }
 
+    private void RefreshIntegrityHmac(IReadOnlyList<SshKeyRecord> keys)
+    {
+        var entries = keys.Select(k => new KeyGarageEntry(
+            k.Id.ToString("N"),
+            k.Fingerprint,
+            CryptoUtilities.ComputeSha256(k.PublicKey))).ToList();
+        var payload = CryptoUtilities.BuildKeyGaragePayload(_session.Username, entries);
+        var hmac = CryptoUtilities.ComputeHmacSha256(_session.DatabaseKey, payload);
+        _repo.UpdateIntegrityHmac(hmac);
+    }
+
     private void EnsureUnlocked()
     {
         if (!_session.IsUnlocked)
         {
             throw new InvalidOperationException("Vault is locked.");
         }
-    }
-
-    private void EnsureVault()
-    {
-        _paths.EnsureDirectories();
-    }
-
-    private async Task<VaultIndex> ReadIndexUnlockedAsync(CancellationToken cancellationToken)
-    {
-        if (!File.Exists(_paths.IndexPath))
-        {
-            return new VaultIndex();
-        }
-
-        await using var fs = new FileStream(_paths.IndexPath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true);
-        var index = await JsonSerializer.DeserializeAsync<VaultIndex>(fs, JsonOptions, cancellationToken)
-            .ConfigureAwait(false);
-        return index ?? new VaultIndex();
-    }
-
-    private async Task WriteIndexUnlockedAsync(VaultIndex index, CancellationToken cancellationToken)
-    {
-        var temp = _paths.IndexPath + ".tmp";
-        await using (var fs = new FileStream(temp, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true))
-        {
-            await JsonSerializer.SerializeAsync(fs, index, JsonOptions, cancellationToken).ConfigureAwait(false);
-            await fs.FlushAsync(cancellationToken).ConfigureAwait(false);
-        }
-
-        File.Copy(temp, _paths.IndexPath, overwrite: true);
-        File.Delete(temp);
     }
 
     private static SshKeyRecord CloneRecord(SshKeyRecord source) => new()

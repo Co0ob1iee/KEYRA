@@ -93,6 +93,7 @@
   <data name="Generate_Algorithm" xml:space="preserve"><value>Algorytm</value></data>
   <data name="Generate_Algorithm_Ed25519" xml:space="preserve"><value>Ed25519 (zalecany)</value></data>
   <data name="Generate_Algorithm_Rsa4096" xml:space="preserve"><value>RSA 4096</value></data>
+  <data name="Generate_Algorithm_EcdsaP384" xml:space="preserve"><value>ECDSA P-384</value></data>
   <data name="Generate_Passphrase" xml:space="preserve"><value>Hasło (opcjonalnie)</value></data>
   <data name="Generate_ConfirmPassphrase" xml:space="preserve"><value>Potwierdź hasło</value></data>
   <data name="Generate_Button" xml:space="preserve"><value>Generuj</value></data>
@@ -168,16 +169,23 @@
   <data name="Connections_ActiveSessionCount" xml:space="preserve"><value>Otwarte sesje: {0}</value></data>
   <data name="Connections_SessionOpened" xml:space="preserve"><value>Otwarto sesję SSH: {0}</value></data>
   <data name="Connections_ErrOpenSession" xml:space="preserve"><value>Nie udało się otworzyć sesji SSH: {0}</value></data>
+  <data name="Connections_JumpHost" xml:space="preserve"><value>Jump host (bastion)</value></data>
+  <data name="Connections_JumpHostNone" xml:space="preserve"><value>(Brak — połączenie bezpośrednie)</value></data>
+  <data name="Connections_JumpHostHint" xml:space="preserve"><value>KEYRA otwiera direct-tcpip przez bastion (klucz A), potem uwierzytelnia się na celu kluczem B (E2E).</value></data>
+  <data name="Connections_ErrJumpKey" xml:space="preserve"><value>Jump host musi używać klucza z sejfu (klucz A).</value></data>
+  <data name="Connections_ErrJumpSelf" xml:space="preserve"><value>Profil nie może być swoim własnym jump hostem.</value></data>
+  <data name="Connections_ErrTimeout" xml:space="preserve"><value>Połączenie anulowane lub przekroczono czas.</value></data>
   <data name="Settings_Title" xml:space="preserve"><value>Ustawienia</value></data>
-  <data name="Settings_Info" xml:space="preserve"><value>Klucze prywatne są szyfrowane AES-256-GCM losowym kluczem głównym (master key), chronionym hasłem użytkownika (Argon2id). Plik KeyGarageHash weryfikuje integralność sejfu. Materiał klucza prywatnego nigdy nie trafia do logu operacji.</value></data>
+  <data name="Settings_Info" xml:space="preserve"><value>Klucze prywatne są szyfrowane AES-256-GCM kluczem bazy (DBK). Hasło mastera wyprowadza MEK przez Argon2id (szyfrowanie kopertowe). KeyGarageHash i tagi GCM weryfikują integralność. Materiał klucza prywatnego nigdy nie trafia do logu operacji.</value></data>
   <data name="Settings_RootPath" xml:space="preserve"><value>Katalog aplikacji (sejf)</value></data>
   <data name="Settings_OpenRoot" xml:space="preserve"><value>Otwórz katalog aplikacji</value></data>
-  <data name="Settings_VaultPath" xml:space="preserve"><value>Folder vault (klucze)</value></data>
+  <data name="Settings_VaultPath" xml:space="preserve"><value>Folder vault (legacy)</value></data>
+  <data name="Settings_DatabasePath" xml:space="preserve"><value>Baza SQLite sejfu</value></data>
   <data name="Settings_OpenVault" xml:space="preserve"><value>Otwórz folder vault</value></data>
   <data name="Settings_SshPath" xml:space="preserve"><value>Domyślny katalog ~/.ssh</value></data>
   <data name="Settings_Language" xml:space="preserve"><value>Język</value></data>
   <data name="Settings_ChangePassword" xml:space="preserve"><value>Zmiana hasła sejfu</value></data>
-  <data name="Settings_ChangePasswordHint" xml:space="preserve"><value>Przeszyfruje klucz główny nowym hasłem i odświeży KeyGarageHash.</value></data>
+  <data name="Settings_ChangePasswordHint" xml:space="preserve"><value>Przeszyfruje klucz bazy (DBK) nowym MEK z hasła i odświeży KeyGarageHash.</value></data>
   <data name="Settings_CurrentPassword" xml:space="preserve"><value>Bieżące hasło</value></data>
   <data name="Settings_NewPassword" xml:space="preserve"><value>Nowe hasło</value></data>
   <data name="Settings_ConfirmPassword" xml:space="preserve"><value>Potwierdź nowe hasło</value></data>
@@ -187,6 +195,26 @@
   <data name="Settings_PasswordMismatch" xml:space="preserve"><value>Nowe hasła nie są identyczne.</value></data>
   <data name="Settings_PasswordChanged" xml:space="preserve"><value>Hasło zostało zmienione. Klucz główny przeszyfrowano.</value></data>
   <data name="Settings_WrongPassword" xml:space="preserve"><value>Bieżące hasło jest nieprawidłowe.</value></data>
+  <data name="Hardware_Title" xml:space="preserve"><value>Klucze sprzętowe</value></data>
+  <data name="Hardware_Pair" xml:space="preserve"><value>Sparuj nowy klucz sprzętowy</value></data>
+  <data name="Hardware_Refresh" xml:space="preserve"><value>Odśwież</value></data>
+  <data name="Hardware_TestTouch" xml:space="preserve"><value>Test</value></data>
+  <data name="Hardware_Delete" xml:space="preserve"><value>Usuń</value></data>
+  <data name="Hardware_Loaded" xml:space="preserve"><value>Zarejestrowane klucze sprzętowe: {0}</value></data>
+  <data name="Hardware_ErrName" xml:space="preserve"><value>Podaj nazwę klucza sprzętowego.</value></data>
+  <data name="Hardware_TouchPrompt" xml:space="preserve"><value>Dotknij YubiKey / FIDO2, gdy miga…</value></data>
+  <data name="Hardware_Paired" xml:space="preserve"><value>Sparowano klucz '{0}'.</value></data>
+  <data name="Hardware_TestOk" xml:space="preserve"><value>Materiał klucza sprzętowego jest dostępny w sejfie.</value></data>
+  <data name="Hardware_TestFail" xml:space="preserve"><value>Test klucza sprzętowego nie powiódł się.</value></data>
+  <data name="Hardware_ConfirmDelete" xml:space="preserve"><value>Usunąć klucz sprzętowy '{0}' z sejfu?</value></data>
+  <data name="Hardware_AgentTitle" xml:space="preserve"><value>Agent SSH</value></data>
+  <data name="Hardware_StartAgent" xml:space="preserve"><value>Uruchom agenta KEYRA</value></data>
+  <data name="Hardware_StopAgent" xml:space="preserve"><value>Zatrzymaj agenta KEYRA</value></data>
+  <data name="Hardware_ListSystemAgent" xml:space="preserve"><value>Pokaż klucze agenta systemowego</value></data>
+  <data name="Hardware_AgentStarted" xml:space="preserve"><value>Agent KEYRA nasłuchuje na \\.\pipe\{0}</value></data>
+  <data name="Hardware_AgentStopped" xml:space="preserve"><value>Agent KEYRA zatrzymany.</value></data>
+  <data name="Hardware_SystemAgentMissing" xml:space="preserve"><value>Agent Windows OpenSSH jest niedostępny.</value></data>
+  <data name="Hardware_SystemAgentCount" xml:space="preserve"><value>Tożsamości agenta systemowego: {0}</value></data>
   <data name="Login_WindowTitle" xml:space="preserve"><value>KEYRA — odblokuj sejf</value></data>
   <data name="Login_Title" xml:space="preserve"><value>Odblokuj sejf</value></data>
   <data name="Login_Subtitle" xml:space="preserve"><value>Podaj dane konta sejfu, aby odszyfrować klucz główny.</value></data>
@@ -232,6 +260,8 @@
   <data name="Reveal_HidingIn" xml:space="preserve"><value>Ukrycie za {0} s</value></data>
   <data name="Algorithm_Ed25519" xml:space="preserve"><value>Ed25519</value></data>
   <data name="Algorithm_Rsa4096" xml:space="preserve"><value>RSA 4096</value></data>
+  <data name="Algorithm_EcdsaP384" xml:space="preserve"><value>ECDSA P-384</value></data>
+  <data name="Algorithm_SkEd25519" xml:space="preserve"><value>FIDO2 sk-ed25519</value></data>
   <data name="Connections_OutputError" xml:space="preserve"><value>[BŁĄD] {0}</value></data>
   <data name="Connections_Completing" xml:space="preserve"><value>Uzupełnianie…</value></data>
   <data name="Connections_CompletionFailed" xml:space="preserve"><value>Uzupełnianie Tab nieudane: {0}</value></data>

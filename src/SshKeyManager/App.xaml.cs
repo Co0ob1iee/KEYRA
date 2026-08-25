@@ -4,6 +4,7 @@ using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SshKeyManager.Services;
+using SshKeyManager.Services.Agent;
 using SshKeyManager.Services.Security;
 using SshKeyManager.Services.Ssh;
 using SshKeyManager.ViewModels;
@@ -198,6 +199,15 @@ public partial class App : Application
         try
         {
             Services.GetService<IVaultSecurityService>()?.Lock();
+            try
+            {
+                Services.GetService<IKeyraAgentProvider>()?.StopAsync().GetAwaiter().GetResult();
+            }
+            catch (Exception)
+            {
+                // Best-effort agent stop.
+            }
+
             var sessions = Services.GetService<ISshSessionWindowService>();
             if (sessions is not null)
             {

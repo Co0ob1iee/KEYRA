@@ -17,6 +17,13 @@ public sealed class SshConnectionProfile
     /// <summary>Vault key used when <see cref="AuthMode"/> is <see cref="SshAuthMode.Key"/>.</summary>
     public Guid? VaultKeyId { get; set; }
 
+    /// <summary>Optional bastion / jump host profile id (proxy_jump_id).</summary>
+    public Guid? ProxyJumpId { get; set; }
+
+    public string? Tags { get; set; }
+
+    public string? Notes { get; set; }
+
     public DateTime? LastConnectedUtc { get; set; }
 
     public bool IsFavorite { get; set; }
@@ -30,6 +37,9 @@ public sealed class SshConnectionProfile
         Username = Username,
         AuthMode = AuthMode,
         VaultKeyId = VaultKeyId,
+        ProxyJumpId = ProxyJumpId,
+        Tags = Tags,
+        Notes = Notes,
         LastConnectedUtc = LastConnectedUtc,
         IsFavorite = IsFavorite
     };

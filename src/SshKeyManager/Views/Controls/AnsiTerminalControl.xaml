@@ -12,7 +12,7 @@
                  Foreground="{StaticResource TextPrimaryBrush}"
                  CaretBrush="{StaticResource AccentBrush}"
                  SelectionBrush="{StaticResource AccentBrush}"
-                 FontFamily="Cascadia Mono, Consolas"
+                 FontFamily="{StaticResource MonoFontFamily}"
                  FontSize="{StaticResource FontSizeBody}"
                  Padding="4">
         <RichTextBox.Resources>

@@ -21,7 +21,8 @@ public partial class ConnectionsViewModel : LocalizedViewModelBase
         nameof(DeleteProfileLabel), nameof(FavoriteLabel), nameof(EmptyProfilesTitle),
         nameof(EmptyProfilesMessage), nameof(PasswordNotSavedHint),
         nameof(ActiveSessionsLabel), nameof(EmptySessionsTitle), nameof(EmptySessionsMessage),
-        nameof(FocusSessionLabel), nameof(ActiveSessionCountLabel)
+        nameof(FocusSessionLabel), nameof(ActiveSessionCountLabel),
+        nameof(JumpHostLabel), nameof(JumpHostNoneLabel), nameof(JumpHostHint)
     ];
 
     private readonly ISshSessionWindowService _sessions;
@@ -67,6 +68,7 @@ public partial class ConnectionsViewModel : LocalizedViewModelBase
     [ObservableProperty] private string _profileName = string.Empty;
     [ObservableProperty] private bool _isFavorite;
     [ObservableProperty] private ConnectionProfileItemViewModel? _selectedProfile;
+    [ObservableProperty] private ConnectionProfileItemViewModel? _selectedJumpHost;
     [ObservableProperty] private bool _hasProfiles;
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private ActiveSshSessionItemViewModel? _selectedActiveSession;
@@ -99,6 +101,24 @@ public partial class ConnectionsViewModel : LocalizedViewModelBase
     public string EmptySessionsMessage => L("Connections_EmptySessionsMessage");
     public string FocusSessionLabel => L("Connections_FocusSession");
     public string ActiveSessionCountLabel => L("Connections_ActiveSessionCount", ActiveSessions.Count);
+    public string JumpHostLabel => L("Connections_JumpHost");
+    public string JumpHostNoneLabel => L("Connections_JumpHostNone");
+    public string JumpHostHint => L("Connections_JumpHostHint");
+
+    public IEnumerable<ConnectionProfileItemViewModel?> JumpHostChoices
+    {
+        get
+        {
+            yield return null;
+            foreach (var profile in SavedProfiles)
+            {
+                if (SelectedProfile is null || profile.Id != SelectedProfile.Id)
+                {
+                    yield return profile;
+                }
+            }
+        }
+    }
 
     public void ConfigureShell(Action<string> setStatus)
     {
@@ -158,6 +178,12 @@ public partial class ConnectionsViewModel : LocalizedViewModelBase
                 if (selectedId is Guid id)
                 {
                     SelectedProfile = SavedProfiles.FirstOrDefault(p => p.Id == id);
+                }
+
+                OnPropertyChanged(nameof(JumpHostChoices));
+                if (SelectedJumpHost is not null)
+                {
+                    SelectedJumpHost = SavedProfiles.FirstOrDefault(p => p.Id == SelectedJumpHost.Id);
                 }
             }
             finally
@@ -327,8 +353,26 @@ public partial class ConnectionsViewModel : LocalizedViewModelBase
         try
         {
             var profileName = string.IsNullOrWhiteSpace(ProfileName) ? null : ProfileName.Trim();
+            SshConnectionProfile? jump = null;
+            SshKeyRecord? jumpKey = null;
+            if (SelectedJumpHost is not null)
+            {
+                jump = SelectedJumpHost.Profile.Clone();
+                if (jump.VaultKeyId is Guid jumpKeyId)
+                {
+                    jumpKey = AvailableKeys.FirstOrDefault(k => k.Id == jumpKeyId);
+                }
+
+                if (jumpKey is null)
+                {
+                    _dialogs.ShowError(L("Connections_ErrJumpKey"), L("Dialog_Title"));
+                    return;
+                }
+            }
+
             var request = new SshSessionLaunchRequest
             {
+                ProfileId = SelectedProfile?.Id,
                 ProfileName = profileName,
                 Host = Host.Trim(),
                 Port = Port,
@@ -336,7 +380,9 @@ public partial class ConnectionsViewModel : LocalizedViewModelBase
                 UsePasswordAuth = UsePasswordAuth,
                 Password = Password,
                 SelectedKey = SelectedKey,
-                KeyPassphrase = KeyPassphrase
+                KeyPassphrase = KeyPassphrase,
+                JumpHost = jump,
+                JumpHostKey = jumpKey
             };
 
             await _sessions.OpenSessionAsync(request).ConfigureAwait(true);
@@ -428,6 +474,15 @@ public partial class ConnectionsViewModel : LocalizedViewModelBase
         Password = string.Empty;
         KeyPassphrase = string.Empty;
 
+        if (profile.ProxyJumpId is Guid jumpId)
+        {
+            SelectedJumpHost = SavedProfiles.FirstOrDefault(p => p.Id == jumpId);
+        }
+        else
+        {
+            SelectedJumpHost = null;
+        }
+
         if (profile.VaultKeyId is Guid keyId)
         {
             SelectedKey = AvailableKeys.FirstOrDefault(k => k.Id == keyId)
@@ -449,6 +504,7 @@ public partial class ConnectionsViewModel : LocalizedViewModelBase
         IsFavorite = false;
         Password = string.Empty;
         KeyPassphrase = string.Empty;
+        SelectedJumpHost = null;
         SelectedKey = AvailableKeys.FirstOrDefault();
     }
 
@@ -481,6 +537,18 @@ public partial class ConnectionsViewModel : LocalizedViewModelBase
             return false;
         }
 
+        if (SelectedJumpHost is not null && SelectedJumpHost.Id == id && id != Guid.Empty)
+        {
+            error = L("Connections_ErrJumpSelf");
+            return false;
+        }
+
+        if (SelectedJumpHost is not null && SelectedJumpHost.Profile.VaultKeyId is null)
+        {
+            error = L("Connections_ErrJumpKey");
+            return false;
+        }
+
         profile = new SshConnectionProfile
         {
             Id = id,
@@ -490,6 +558,7 @@ public partial class ConnectionsViewModel : LocalizedViewModelBase
             Username = Username.Trim(),
             AuthMode = UsePasswordAuth ? SshAuthMode.Password : SshAuthMode.Key,
             VaultKeyId = UsePasswordAuth ? null : SelectedKey?.Id,
+            ProxyJumpId = SelectedJumpHost?.Id,
             IsFavorite = IsFavorite,
             LastConnectedUtc = SelectedProfile?.Profile.LastConnectedUtc
         };

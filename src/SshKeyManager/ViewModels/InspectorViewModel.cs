@@ -86,9 +86,11 @@ public partial class InspectorViewModel : LocalizedViewModelBase
 
     public string AlgorithmDisplay => SelectedRecord?.Algorithm switch
     {
+        null => string.Empty,
         SshKeyAlgorithm.Ed25519 => L("Algorithm_Ed25519"),
         SshKeyAlgorithm.Rsa4096 => L("Algorithm_Rsa4096"),
-        null => string.Empty,
+        SshKeyAlgorithm.EcdsaP384 => L("Algorithm_EcdsaP384"),
+        SshKeyAlgorithm.SkEd25519 => L("Algorithm_SkEd25519"),
         _ => SelectedRecord!.Algorithm.ToString()
     };
 

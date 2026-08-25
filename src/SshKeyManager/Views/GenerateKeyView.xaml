@@ -36,6 +36,9 @@
                                                     <DataTrigger Binding="{Binding}" Value="{x:Static models:SshKeyAlgorithm.Rsa4096}">
                                                         <Setter Property="Text" Value="{Binding DataContext.Rsa4096Label, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                                                     </DataTrigger>
+                                                    <DataTrigger Binding="{Binding}" Value="{x:Static models:SshKeyAlgorithm.EcdsaP384}">
+                                                        <Setter Property="Text" Value="{Binding DataContext.EcdsaP384Label, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                                    </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
                                         </TextBlock.Style>
@@ -74,7 +77,7 @@
                         <TextBlock Text="{Binding FingerprintLabel}" Style="{StaticResource LabelTextStyle}" />
                         <TextBox Text="{Binding LastFingerprint, Mode=OneWay}"
                                  IsReadOnly="True"
-                                 FontFamily="Consolas"
+                                 FontFamily="{StaticResource MonoFontFamily}"
                                  Margin="{StaticResource MarginFieldBottom}" />
 
                         <TextBlock Text="{Binding PublicKeyLabel}" Style="{StaticResource LabelTextStyle}" />
@@ -82,7 +85,7 @@
                                  IsReadOnly="True"
                                  TextWrapping="Wrap"
                                  Height="90"
-                                 FontFamily="Consolas"
+                                 FontFamily="{StaticResource MonoFontFamily}"
                                  FontSize="{StaticResource FontSizeMono}" />
                     </StackPanel>
                 </Border>

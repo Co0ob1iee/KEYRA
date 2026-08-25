@@ -49,6 +49,21 @@ public interface ISshConnectionService : IDisposable
         string password,
         CancellationToken cancellationToken = default);
 
+    Task ConnectViaJumpHostAsync(
+        string jumpHost,
+        int jumpPort,
+        string jumpUsername,
+        string jumpPrivateKeyPem,
+        string? jumpKeyPassphrase,
+        string targetHost,
+        int targetPort,
+        string targetUsername,
+        bool usePasswordAuth,
+        string? targetPassword,
+        string? targetPrivateKeyPem,
+        string? targetKeyPassphrase,
+        CancellationToken cancellationToken = default);
+
     Task SendCommandAsync(string command, CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<string>> RequestTabCompletionAsync(
@@ -68,6 +83,8 @@ public sealed class SshConnectionService : ISshConnectionService
     private readonly object _completionSync = new();
     private readonly StringBuilder _completionBuffer = new();
     private SshClient? _client;
+    private SshClient? _jumpClient;
+    private ForwardedPortLocal? _jumpForward;
     private ShellStream? _shell;
     private CancellationTokenSource? _readCts;
     private Task? _readTask;
@@ -172,6 +189,128 @@ public sealed class SshConnectionService : ISshConnectionService
             State = SshConnectionState.Disconnected;
             RaiseOutput($"Connection failed: {ex.Message}", isError: true);
             throw new InvalidOperationException($"SSH connection to {host}:{port} failed.", ex);
+        }
+    }
+
+    public async Task ConnectViaJumpHostAsync(
+        string jumpHost,
+        int jumpPort,
+        string jumpUsername,
+        string jumpPrivateKeyPem,
+        string? jumpKeyPassphrase,
+        string targetHost,
+        int targetPort,
+        string targetUsername,
+        bool usePasswordAuth,
+        string? targetPassword,
+        string? targetPrivateKeyPem,
+        string? targetKeyPassphrase,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(jumpHost);
+        ArgumentException.ThrowIfNullOrWhiteSpace(jumpUsername);
+        ArgumentException.ThrowIfNullOrWhiteSpace(jumpPrivateKeyPem);
+        ArgumentException.ThrowIfNullOrWhiteSpace(targetHost);
+        ArgumentException.ThrowIfNullOrWhiteSpace(targetUsername);
+
+        if (usePasswordAuth)
+        {
+            ArgumentNullException.ThrowIfNull(targetPassword);
+        }
+        else
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(targetPrivateKeyPem);
+        }
+
+        await DisconnectInternalAsync().ConfigureAwait(false);
+        State = SshConnectionState.Connecting;
+
+        try
+        {
+            await Task.Run(() =>
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                using var jumpKeyStream = new MemoryStream(Encoding.UTF8.GetBytes(jumpPrivateKeyPem));
+                var jumpKeyFile = string.IsNullOrEmpty(jumpKeyPassphrase)
+                    ? new PrivateKeyFile(jumpKeyStream)
+                    : new PrivateKeyFile(jumpKeyStream, jumpKeyPassphrase);
+
+                var jumpClient = new SshClient(jumpHost, jumpPort, jumpUsername, jumpKeyFile)
+                {
+                    ConnectionInfo = { Timeout = TimeSpan.FromSeconds(20) }
+                };
+                jumpClient.Connect();
+                cancellationToken.ThrowIfCancellationRequested();
+
+                // Bastion opens direct-tcpip to the target; KEYRA authenticates end-to-end on Key B.
+                var forward = new ForwardedPortLocal("127.0.0.1", 0, targetHost, (uint)targetPort);
+                jumpClient.AddForwardedPort(forward);
+                forward.Start();
+                cancellationToken.ThrowIfCancellationRequested();
+
+                ConnectionInfo targetInfo;
+                if (usePasswordAuth)
+                {
+                    targetInfo = new PasswordConnectionInfo(
+                        "127.0.0.1",
+                        (int)forward.BoundPort,
+                        targetUsername,
+                        targetPassword!);
+                }
+                else
+                {
+                    using var targetKeyStream = new MemoryStream(Encoding.UTF8.GetBytes(targetPrivateKeyPem!));
+                    var targetKeyFile = string.IsNullOrEmpty(targetKeyPassphrase)
+                        ? new PrivateKeyFile(targetKeyStream)
+                        : new PrivateKeyFile(targetKeyStream, targetKeyPassphrase);
+                    targetInfo = new PrivateKeyConnectionInfo(
+                        "127.0.0.1",
+                        (int)forward.BoundPort,
+                        targetUsername,
+                        targetKeyFile);
+                }
+
+                targetInfo.Timeout = TimeSpan.FromSeconds(20);
+                var targetClient = new SshClient(targetInfo);
+                targetClient.Connect();
+
+                var shell = targetClient.CreateShellStream("xterm", 120, 40, 800, 600, 8192);
+                lock (_sync)
+                {
+                    _jumpClient = jumpClient;
+                    _jumpForward = forward;
+                    _client = targetClient;
+                    _shell = shell;
+                }
+            }, cancellationToken).ConfigureAwait(false);
+
+            ShellStream? shell;
+            lock (_sync)
+            {
+                shell = _shell;
+            }
+
+            if (shell is null)
+            {
+                throw new InvalidOperationException("Jump host tunnel did not establish a shell.");
+            }
+
+            _readCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            _readTask = Task.Run(() => ReadShellLoopAsync(shell, _readCts.Token), CancellationToken.None);
+
+            State = SshConnectionState.Connected;
+            RaiseOutput(
+                $"Connected to {targetHost}:{targetPort} as {targetUsername} via jump {jumpHost}:{jumpPort}.");
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            await CleanupJumpAsync().ConfigureAwait(false);
+            State = SshConnectionState.Disconnected;
+            RaiseOutput($"Jump host connection failed: {ex.Message}", isError: true);
+            throw new InvalidOperationException(
+                $"SSH jump connection to {targetHost}:{targetPort} via {jumpHost}:{jumpPort} failed.",
+                ex);
         }
     }
 
@@ -280,10 +419,60 @@ public sealed class SshConnectionService : ISshConnectionService
             _shell = null;
             _client?.Dispose();
             _client = null;
+            try
+            {
+                _jumpForward?.Stop();
+            }
+            catch
+            {
+                // Best-effort.
+            }
+
+            _jumpForward = null;
+            _jumpClient?.Dispose();
+            _jumpClient = null;
         }
 
         _readCts?.Dispose();
         _readCts = null;
+    }
+
+    private async Task CleanupJumpAsync()
+    {
+        await Task.Run(() =>
+        {
+            lock (_sync)
+            {
+                try
+                {
+                    _jumpForward?.Stop();
+                }
+                catch
+                {
+                    // Best-effort.
+                }
+
+                _jumpForward = null;
+                try
+                {
+                    if (_jumpClient?.IsConnected == true)
+                    {
+                        _jumpClient.Disconnect();
+                    }
+                }
+                catch
+                {
+                    // Best-effort.
+                }
+
+                _jumpClient?.Dispose();
+                _jumpClient = null;
+                _shell?.Dispose();
+                _shell = null;
+                _client?.Dispose();
+                _client = null;
+            }
+        }).ConfigureAwait(false);
     }
 
     private async Task ConnectInternalAsync(ConnectionInfo connectionInfo, CancellationToken cancellationToken)
@@ -390,6 +579,32 @@ public sealed class SshConnectionService : ISshConnectionService
             _shell = null;
             _client?.Dispose();
             _client = null;
+
+            try
+            {
+                _jumpForward?.Stop();
+            }
+            catch (Exception)
+            {
+                // Best-effort shutdown.
+            }
+
+            _jumpForward = null;
+
+            try
+            {
+                if (_jumpClient?.IsConnected == true)
+                {
+                    _jumpClient.Disconnect();
+                }
+            }
+            catch (Exception)
+            {
+                // Best-effort shutdown.
+            }
+
+            _jumpClient?.Dispose();
+            _jumpClient = null;
         }
 
         _readCts?.Dispose();

@@ -4,6 +4,8 @@ namespace SshKeyManager.Services.Ssh;
 
 public sealed class SshSessionLaunchRequest
 {
+    public Guid? ProfileId { get; init; }
+
     public string? ProfileName { get; init; }
 
     public required string Host { get; init; }
@@ -19,6 +21,13 @@ public sealed class SshSessionLaunchRequest
     public SshKeyRecord? SelectedKey { get; init; }
 
     public string KeyPassphrase { get; init; } = string.Empty;
+
+    /// <summary>Optional bastion profile for JumpHost (direct-tcpip).</summary>
+    public SshConnectionProfile? JumpHost { get; init; }
+
+    public SshKeyRecord? JumpHostKey { get; init; }
+
+    public string JumpHostKeyPassphrase { get; init; } = string.Empty;
 
     public string BuildDisplayTitle()
     {

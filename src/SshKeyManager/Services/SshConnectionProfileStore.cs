@@ -1,41 +1,69 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using SshKeyManager.Models;
+using SshKeyManager.Services.Data;
 using SshKeyManager.Services.Security;
 
 namespace SshKeyManager.Services;
 
+public interface IConnectionAuditService
+{
+    Task LogAsync(
+        Guid serverId,
+        ConnectionLogStatus status,
+        string? errorMessage = null,
+        CancellationToken cancellationToken = default);
+}
+
+public sealed class ConnectionAuditService : IConnectionAuditService
+{
+    private readonly KeyraRepository _repo;
+    private readonly IVaultSession _session;
+
+    public ConnectionAuditService(KeyraRepository repo, IVaultSession session)
+    {
+        _repo = repo ?? throw new ArgumentNullException(nameof(repo));
+        _session = session ?? throw new ArgumentNullException(nameof(session));
+    }
+
+    public Task LogAsync(
+        Guid serverId,
+        ConnectionLogStatus status,
+        string? errorMessage = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (!_session.IsUnlocked || serverId == Guid.Empty)
+        {
+            return Task.CompletedTask;
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+        _repo.InsertConnectionLog(serverId.ToString("N"), status, errorMessage);
+        return Task.CompletedTask;
+    }
+}
+
 public sealed class SshConnectionProfileStore : ISshConnectionProfileStore
 {
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        WriteIndented = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
-    };
-
+    private readonly KeyraRepository _repo;
     private readonly VaultPaths _paths;
     private readonly SemaphoreSlim _gate = new(1, 1);
-    private List<SshConnectionProfile> _cache = new();
-    private bool _loaded;
+    private bool _legacyImportAttempted;
 
-    public SshConnectionProfileStore(VaultPaths paths)
+    public SshConnectionProfileStore(KeyraRepository repo, VaultPaths paths)
     {
+        _repo = repo ?? throw new ArgumentNullException(nameof(repo));
         _paths = paths ?? throw new ArgumentNullException(nameof(paths));
     }
 
-    private string ConnectionsFilePath => Path.Combine(_paths.RootDirectory, "connections.json");
-
     public async Task<IReadOnlyList<SshConnectionProfile>> ListAsync(CancellationToken cancellationToken = default)
     {
-        await EnsureLoadedAsync(cancellationToken).ConfigureAwait(false);
+        await EnsureLegacyImportAsync(cancellationToken).ConfigureAwait(false);
         await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            return _cache
+            return _repo.ListServers()
+                .Select(ToProfile)
                 .OrderByDescending(p => p.IsFavorite)
                 .ThenBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
-                .Select(p => p.Clone())
                 .ToList();
         }
         finally
@@ -46,12 +74,12 @@ public sealed class SshConnectionProfileStore : ISshConnectionProfileStore
 
     public async Task<SshConnectionProfile?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        await EnsureLoadedAsync(cancellationToken).ConfigureAwait(false);
+        await EnsureLegacyImportAsync(cancellationToken).ConfigureAwait(false);
         await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            var match = _cache.FirstOrDefault(p => p.Id == id);
-            return match?.Clone();
+            var row = _repo.GetServer(id.ToString("N"));
+            return row is null ? null : ToProfile(row);
         }
         finally
         {
@@ -85,27 +113,22 @@ public sealed class SshConnectionProfileStore : ISshConnectionProfileStore
             throw new ArgumentOutOfRangeException(nameof(profile), profile.Port, "Port must be 1–65535.");
         }
 
-        await EnsureLoadedAsync(cancellationToken).ConfigureAwait(false);
+        if (profile.ProxyJumpId == profile.Id && profile.Id != Guid.Empty)
+        {
+            throw new ArgumentException("A server cannot use itself as jump host.", nameof(profile));
+        }
+
+        await EnsureLegacyImportAsync(cancellationToken).ConfigureAwait(false);
         await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            var stored = profile.Clone();
+            var stored = Normalize(profile);
             if (stored.Id == Guid.Empty)
             {
                 stored.Id = Guid.NewGuid();
             }
 
-            var index = _cache.FindIndex(p => p.Id == stored.Id);
-            if (index >= 0)
-            {
-                _cache[index] = stored;
-            }
-            else
-            {
-                _cache.Add(stored);
-            }
-
-            await SaveUnlockedAsync(cancellationToken).ConfigureAwait(false);
+            _repo.UpsertServer(ToRow(stored));
             return stored.Clone();
         }
         finally
@@ -121,17 +144,11 @@ public sealed class SshConnectionProfileStore : ISshConnectionProfileStore
             return false;
         }
 
-        await EnsureLoadedAsync(cancellationToken).ConfigureAwait(false);
+        await EnsureLegacyImportAsync(cancellationToken).ConfigureAwait(false);
         await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            var removed = _cache.RemoveAll(p => p.Id == id) > 0;
-            if (removed)
-            {
-                await SaveUnlockedAsync(cancellationToken).ConfigureAwait(false);
-            }
-
-            return removed;
+            return _repo.DeleteServer(id.ToString("N"));
         }
         finally
         {
@@ -139,18 +156,59 @@ public sealed class SshConnectionProfileStore : ISshConnectionProfileStore
         }
     }
 
-    private async Task EnsureLoadedAsync(CancellationToken cancellationToken)
+    private async Task EnsureLegacyImportAsync(CancellationToken cancellationToken)
     {
+        if (_legacyImportAttempted)
+        {
+            return;
+        }
+
         await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            if (_loaded)
+            if (_legacyImportAttempted)
             {
                 return;
             }
 
-            await LoadUnlockedAsync(cancellationToken).ConfigureAwait(false);
-            _loaded = true;
+            _legacyImportAttempted = true;
+            if (_repo.ListServers().Count > 0 || !File.Exists(_paths.ConnectionsFilePath))
+            {
+                return;
+            }
+
+            try
+            {
+                await using var stream = File.OpenRead(_paths.ConnectionsFilePath);
+                var document = await System.Text.Json.JsonSerializer
+                    .DeserializeAsync<LegacyConnectionsDocument>(
+                        stream,
+                        new System.Text.Json.JsonSerializerOptions
+                        {
+                            PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+                            Converters =
+                            {
+                                new System.Text.Json.Serialization.JsonStringEnumConverter(
+                                    System.Text.Json.JsonNamingPolicy.CamelCase)
+                            }
+                        },
+                        cancellationToken)
+                    .ConfigureAwait(false);
+
+                foreach (var profile in document?.Profiles ?? [])
+                {
+                    if (profile is null || profile.Id == Guid.Empty)
+                    {
+                        continue;
+                    }
+
+                    _repo.UpsertServer(ToRow(Normalize(profile)));
+                }
+            }
+            catch
+            {
+                // Best-effort one-time import.
+            }
         }
         finally
         {
@@ -158,52 +216,63 @@ public sealed class SshConnectionProfileStore : ISshConnectionProfileStore
         }
     }
 
-    private async Task LoadUnlockedAsync(CancellationToken cancellationToken)
+    private static SshConnectionProfile ToProfile(ServerRow row)
     {
-        try
+        _ = Guid.TryParse(row.Id, out var id);
+        Guid? keyId = null;
+        if (!string.IsNullOrWhiteSpace(row.DefaultKeyId) && Guid.TryParse(row.DefaultKeyId, out var parsedKey))
         {
-            _paths.EnsureDirectories();
-            if (!File.Exists(ConnectionsFilePath))
-            {
-                _cache = new List<SshConnectionProfile>();
-                return;
-            }
-
-            await using var stream = File.OpenRead(ConnectionsFilePath);
-            var document = await JsonSerializer
-                .DeserializeAsync<ConnectionsDocument>(stream, JsonOptions, cancellationToken)
-                .ConfigureAwait(false);
-
-            _cache = document?.Profiles?
-                .Where(p => p is not null && p.Id != Guid.Empty)
-                .Select(p => Normalize(p!))
-                .ToList()
-                ?? new List<SshConnectionProfile>();
+            keyId = parsedKey;
         }
-        catch (Exception)
-        {
-            _cache = new List<SshConnectionProfile>();
-        }
-    }
 
-    private async Task SaveUnlockedAsync(CancellationToken cancellationToken)
-    {
-        _paths.EnsureDirectories();
-        var document = new ConnectionsDocument
+        Guid? jumpId = null;
+        if (!string.IsNullOrWhiteSpace(row.ProxyJumpId) && Guid.TryParse(row.ProxyJumpId, out var parsedJump))
         {
-            Profiles = _cache.Select(Normalize).ToList()
+            jumpId = parsedJump;
+        }
+
+        DateTime? last = null;
+        if (!string.IsNullOrWhiteSpace(row.LastConnectedAt) &&
+            DateTime.TryParse(row.LastConnectedAt, null, System.Globalization.DateTimeStyles.RoundtripKind, out var parsedLast))
+        {
+            last = parsedLast.ToUniversalTime();
+        }
+
+        return new SshConnectionProfile
+        {
+            Id = id,
+            Name = row.Title,
+            Host = row.Host,
+            Port = row.Port,
+            Username = row.Username,
+            AuthMode = string.Equals(row.AuthMode, "password", StringComparison.OrdinalIgnoreCase)
+                ? SshAuthMode.Password
+                : SshAuthMode.Key,
+            VaultKeyId = keyId,
+            ProxyJumpId = jumpId,
+            Tags = row.Tags,
+            Notes = row.Notes,
+            LastConnectedUtc = last,
+            IsFavorite = row.IsFavorite
         };
-
-        var tempPath = ConnectionsFilePath + ".tmp";
-        await using (var stream = File.Create(tempPath))
-        {
-            await JsonSerializer.SerializeAsync(stream, document, JsonOptions, cancellationToken)
-                .ConfigureAwait(false);
-        }
-
-        File.Copy(tempPath, ConnectionsFilePath, overwrite: true);
-        File.Delete(tempPath);
     }
+
+    private static ServerRow ToRow(SshConnectionProfile profile) => new()
+    {
+        Id = profile.Id.ToString("N"),
+        Title = profile.Name,
+        Host = profile.Host,
+        Port = profile.Port,
+        Username = profile.Username,
+        DefaultKeyId = profile.VaultKeyId is { } key ? key.ToString("N") : null,
+        ProxyJumpId = profile.ProxyJumpId is { } jump ? jump.ToString("N") : null,
+        Tags = profile.Tags,
+        Notes = profile.Notes,
+        AuthMode = profile.AuthMode == SshAuthMode.Password ? "password" : "key",
+        IsFavorite = profile.IsFavorite,
+        LastConnectedAt = profile.LastConnectedUtc?.ToUniversalTime().ToString("O"),
+        CreatedAt = DateTime.UtcNow.ToString("O")
+    };
 
     private static SshConnectionProfile Normalize(SshConnectionProfile profile)
     {
@@ -216,7 +285,6 @@ public sealed class SshConnectionProfileStore : ISshConnectionProfileStore
             clone.Port = 22;
         }
 
-        // Passwords are never persisted on profiles.
         if (clone.AuthMode == SshAuthMode.Password)
         {
             clone.VaultKeyId = null;
@@ -225,8 +293,8 @@ public sealed class SshConnectionProfileStore : ISshConnectionProfileStore
         return clone;
     }
 
-    private sealed class ConnectionsDocument
+    private sealed class LegacyConnectionsDocument
     {
-        public List<SshConnectionProfile> Profiles { get; set; } = new();
+        public List<SshConnectionProfile?>? Profiles { get; set; }
     }
 }

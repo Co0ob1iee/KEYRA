@@ -200,6 +200,30 @@
                             <PasswordBox helpers:PasswordBoxHelper.BindPassword="True"
                                          helpers:PasswordBoxHelper.BoundPassword="{Binding KeyPassphrase, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         </StackPanel>
+                        <TextBlock Text="{Binding JumpHostLabel}" Style="{StaticResource LabelTextStyle}" Margin="0,12,0,0" />
+                        <ComboBox ItemsSource="{Binding JumpHostChoices}"
+                                  SelectedItem="{Binding SelectedJumpHost}"
+                                  Margin="0,0,0,4">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock>
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="{Binding Name}" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding}" Value="{x:Null}">
+                                                        <Setter Property="Text" Value="{Binding DataContext.JumpHostNoneLabel, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <TextBlock Text="{Binding JumpHostHint}"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   TextWrapping="Wrap" />
                     </StackPanel>
 
                     <StackPanel Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal" Margin="0,0,0,8">
